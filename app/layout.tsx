@@ -23,11 +23,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="ainmhicon">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="flex h-100 flex-col items-center justify-contet-space-between min-h-screen p-8 pt-0 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+          <main className="flex flex-col flex-grow gap-[32px] items-center sm:items-start">
+            <div className="w-[20rem] h-[calc(13rem)] flex justify-center mt-6 relative">
+              <img
+                src='banner.webp'
+                alt="Logo"
+                className="w-[20rem] absolute"
+              />
+            </div>
+
+            {children}
+          </main>
+          <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+            Copyright Ainmhicon 2025
+          </footer>
+        </div>
       </body>
     </html>
   );
