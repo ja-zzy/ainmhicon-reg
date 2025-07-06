@@ -1,0 +1,1 @@
+These email templates are sent from Supabase. To update the email templates go to https://supabase.com/dashboard/project/jxkruzcavimhseccupfu/auth/templates I'm just keeping them here so they don't get lost
