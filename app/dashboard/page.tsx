@@ -1,47 +1,66 @@
 "use client"
-import { FormEventHandler, useEffect, useState } from 'react'
-import { supabase } from '../utils/supabaseClient'
-import { Attendee } from '../utils/types'
-import { useRouter } from 'next/navigation'
-import Loading from '../components/loading'
+import Link from 'next/link'
+import { AuthWrapper } from '../components/authWrapper'
+import { useAuth } from '../context/authContext'
+import { useEffect, useState } from 'react'
+import moment from 'moment'
 
-export default function UserDetailsPage() {
-    const router = useRouter()
-    const [attendee, setAttendee] = useState<Attendee | null>(null)
-
+const regStart = 1754006400000
+export default function Dashboard() {
+    const { attendee, logout } = useAuth()
+    const [time, setTime] = useState(Date.now());
 
     useEffect(() => {
-        const init = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            const user = session?.user || null
-            if (!user) {
-                router.push('/login')
-                return
-            }
-            const result = await supabase.from('attendees').select('*').eq('user_id', user.id)
+        const interval = setInterval(() => setTime(Date.now()), 1000);
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
+    if (!attendee) { return null }
 
-            if (!result?.data) {
-                router.push('/login')
-                return
-            }
-            const foundDetails = result.data[0]
-            setAttendee(foundDetails)
-        }
-        init()
-    }, [])
-
-
+    const duration = moment.duration(regStart - time);
+    const days = Math.floor(duration.asDays());
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+    const seconds = duration.seconds();
     return (
-        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 pt-18 shadow-lg">
-            {!attendee && <Loading />}
-            {attendee && (
-                <>
-                    <h3>
-                        Welcome back, {attendee.first_name}!
-                    </h3>
-                    <a href='/user-details'>Update my details</a>
-                </>
-            )}
-        </fieldset>
+        <>
+            <h2 className='font-[family-name:var(--font-sora)] text-xl'>
+                Welcome back, {attendee.first_name}!
+            </h2>
+            <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>
+            <h3>Your Tasks</h3>
+            <Link href='/user-details' className='btn'>Update my details </Link>
+            <Link href='/reg-2026' className='btn btn-dash cursor-not-allowed pointer-events-none' >Register for Ainmhícon 2026 </Link>
+
+            <h3 className='mt-[8px]'>Reg Opens In</h3>
+            <div className="grid grid-flow-col gap-5 text-center auto-cols-max m-auto my-[16px]">
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": days } as React.CSSProperties} aria-live="polite" aria-label={days.toString()}>{days}</span>
+                    </span>
+                    days
+                </div>
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": hours } as React.CSSProperties} aria-live="polite" aria-label={hours.toString()}>{hours}</span>
+                    </span>
+                    hours
+                </div>
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": minutes } as React.CSSProperties} aria-live="polite" aria-label={minutes.toString()}>{minutes}</span>
+                    </span>
+                    min
+                </div>
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": seconds } as React.CSSProperties} aria-live="polite" aria-label={seconds.toString()}>{seconds}</span>
+                    </span>
+                    sec
+                </div>
+            </div>
+            <button onClick={() => logout()} className="btn btn-neutral mt-4 w-full mt-auto">Logout</button>
+        </>
     )
 }

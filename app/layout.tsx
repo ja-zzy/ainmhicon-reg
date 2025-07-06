@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from './context/authContext'
+import { AuthWrapper } from "./components/authWrapper";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const interSans = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const soraSans = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
 });
 
@@ -25,24 +27,29 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="ainmhicon">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${interSans.variable} ${soraSans.variable} antialiased`}
       >
-        <div className="flex h-100 flex-col items-center justify-contet-space-between min-h-screen p-8 pt-0 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-          <main className="flex flex-col flex-grow gap-[32px] items-center sm:items-start">
-            <div className="w-[20rem] h-[calc(13rem)] flex justify-center mt-6 relative">
-              <img
-                src='banner.webp'
-                alt="Logo"
-                className="w-[20rem] absolute"
-              />
-            </div>
-
-            {children}
-          </main>
-          <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-            Copyright Ainmhicon 2025
-          </footer>
-        </div>
+        <AuthProvider>
+          <div className="flex h-100 flex-col items-center justify-contet-space-between min-h-screen p-8 pt-0 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-inter)]">
+            <main className="flex flex-col flex-grow gap-[32px] items-center sm:items-start">
+              <div className="w-[20rem] h-[calc(13rem)] flex justify-center mt-6 relative">
+                <img
+                  src='banner.webp'
+                  alt="Logo"
+                  className="w-[20rem] absolute"
+                />
+              </div>
+              <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 pt-18 shadow-lg min-h-[50%] flex flex-col justify-center">
+                <AuthWrapper>
+                  {children}
+                </AuthWrapper>
+              </fieldset>
+            </main>
+            <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+              Copyright Ainmhicon 2025
+            </footer>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
