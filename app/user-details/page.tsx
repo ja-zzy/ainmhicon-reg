@@ -1,28 +1,76 @@
 "use client"
-import { FormEventHandler, useEffect, useState } from 'react'
+import { ChangeEventHandler, FormEventHandler, useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import { Attendee } from '../utils/types'
 import ErrorMessage from '../components/errorMessage'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../context/authContext'
 import { AuthWrapper } from '../components/authWrapper'
+import Loading from '../components/loading'
 
 export default function UserDetailsPage() {
     const [error, setError] = useState<string | null>()
-    const { attendee, updateProfile } = useAuth()
+    const { attendee, user, updateProfile } = useAuth()
     const [tempAttendee, setTempAttendee] = useState<Attendee>(attendee || { first_name: '', last_name: '', phone: '', pronouns: '' })
+    const [userProfilePic, setUserProfilePic] = useState<'loading' | string | undefined>('loading')
+
     const router = useRouter()
-    useEffect(() => { if (attendee) { setTempAttendee(attendee) } }, [attendee])
+    useEffect(() => {
+        if (attendee) {
+            setTempAttendee(attendee)
+        }
+    }, [attendee])
+
+    const refreshPicture = async (userId: string) => {
+        const filePath = `${userId}/profile_picture`
+        const { data } = await supabase
+            .storage
+            .from('attendee-badge-images')
+            .createSignedUrl(filePath, 60 * 60)
+        setUserProfilePic(data?.signedUrl)
+    }
+
+    useEffect(() => {
+        if (user) {
+            refreshPicture(user.id)
+        }
+    }, [user])
+
     const handleUpdate: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault()
         setError(null)
         updateProfile(tempAttendee).then(() => router.push('/dashboard')).catch((e) => setError(e.message))
     }
 
+    const imageChangeHandler: ChangeEventHandler<HTMLInputElement> = async (e) => {
+        if (!user?.id) { return }
+        const file = e.target?.files?.[0]
+        if (!file) return
+
+        const filePath = `${user.id}/profile_picture`
+        const { error } = await supabase
+            .storage
+            .from('attendee-badge-images')
+            .upload(filePath, file, { upsert: true })
+
+        if (error) { setError(error.message) }
+        else { refreshPicture(user.id) }
+    }
     return (
         <AuthWrapper requireAuth={true} allowIncompleteProfile={true}>
             <form onSubmit={handleUpdate} className='p-2'>
                 <h2 className='font-[family-name:var(--font-sora)] text-xl mb-3'>Your Details</h2>
+                <div className={`avatar flex flex-col justify-center me-3 min-h-[96px] ${userProfilePic === 'loading' || !userProfilePic ? 'avatar-placeholder' : ''}`}>
+                    <label htmlFor='profile-picture' className={`w-24 rounded-full m-auto cursor-pointer relative group overflow-hidden text-black ${userProfilePic === 'loading' || !userProfilePic ? 'bg-base-100' : ''}`}>
+                        {userProfilePic === 'loading' && <Loading />}
+                        {!userProfilePic && <div className="text-l w-[96px] h-[96px] flex justify-center items-center text-center">No Badge!</div>}
+                        {userProfilePic && userProfilePic !== 'loading' && <img src={userProfilePic} />}
+                        <div className='absolute top-[100%] w-[100%] h-[100%] text-center bg-neutral/30 transition-all duration-150 ease-out backdrop-blur-xs text-white flex items-center justify-center  group-hover:top-[0%]'>
+                            <i className=''>Change<br />Picture</i>
+                        </div>
+                    </label>
+                    <input onChange={imageChangeHandler} type='file' accept='image/png, image/jpeg' id='profile-picture' className='hidden' />
+                </div>
                 <label className="label">First Name</label>
                 <input type="text" className="input" placeholder="Ceol" value={tempAttendee?.first_name || ''}
                     onChange={(e) => setTempAttendee({ ...tempAttendee, first_name: e.target.value })}
@@ -42,6 +90,6 @@ export default function UserDetailsPage() {
                 <ErrorMessage error={error} />
                 <button type="submit" className="btn btn-neutral mt-4 w-full">Update my info</button>
             </form>
-        </AuthWrapper>
+        </AuthWrapper >
     )
 }
