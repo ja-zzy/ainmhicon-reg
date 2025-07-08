@@ -1,5 +1,5 @@
 "use client"
-import { ChangeEventHandler, FormEventHandler, useEffect, useState } from 'react'
+import { ChangeEventHandler, FormEventHandler, MouseEventHandler, useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import { Attendee } from '../utils/types'
 import ErrorMessage from '../components/errorMessage'
@@ -56,6 +56,11 @@ export default function UserDetailsPage() {
         if (error) { setError(error.message) }
         else { refreshPicture(user.id) }
     }
+
+    function navigateBack() {
+        router.push('/dashboard')
+    }
+
     return (
         <AuthWrapper requireAuth={true} allowIncompleteProfile={true}>
             <form onSubmit={handleUpdate} className='p-2'>
@@ -88,7 +93,8 @@ export default function UserDetailsPage() {
                     onChange={(e) => setTempAttendee({ ...tempAttendee, pronouns: e.target.value })}
                 />
                 <ErrorMessage error={error} />
-                <button type="submit" className="btn btn-neutral mt-4 w-full">Update my info</button>
+                <button type="submit" className="btn btn-neutral mt-4 w-full">Update</button>
+                <button type="button" onClick={navigateBack} className="btn btn-neutral mt-4 w-full">Cancel</button>
             </form>
         </AuthWrapper >
     )
