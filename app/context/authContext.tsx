@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { Attendee } from '../utils/types'
-import { supabase } from '../utils/supabaseClient'
+import { supabase } from '../utils/public/supabase'
 
 interface AuthState {
     user: User | null

@@ -2,7 +2,7 @@
 
 import { AuthWrapper } from '../components/authWrapper'
 
-import { handleCheckout } from '../utils/stripeCheckoutUtil';
+import { handleCheckout } from '../utils/public/stripe';
 import { useAuth } from '../context/authContext';
 import Loading from '../components/loading';
 

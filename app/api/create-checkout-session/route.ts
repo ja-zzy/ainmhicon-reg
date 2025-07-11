@@ -1,9 +1,7 @@
-import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SK!);
+import { stripe } from '@/app/utils/private/stripe';
 
 export async function POST(req: Request) {
     const { priceId, userId } = await req.json()
-    console.log(req.headers.get('origin'))
     try {
         const session = await stripe.checkout.sessions.create({
             line_items: [

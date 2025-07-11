@@ -1,6 +1,5 @@
 "use client"
 import Link from 'next/link'
-import { AuthWrapper } from '../components/authWrapper'
 import { useAuth } from '../context/authContext'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
