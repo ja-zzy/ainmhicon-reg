@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { useAuth } from '../context/authContext'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
+import { REG_START_TIME } from '../utils/constants'
 
-const regStart = 1754006400000
 export default function Dashboard() {
     const { attendee, registration, logout } = useAuth()
     const [time, setTime] = useState(Date.now());
@@ -27,7 +27,7 @@ export default function Dashboard() {
 
     if (!attendee) { return null }
 
-    const duration = moment.duration(regStart - time);
+    const duration = moment.duration(REG_START_TIME - time);
     const days = Math.floor(duration.asDays());
     const hours = duration.hours();
     const minutes = duration.minutes();
@@ -52,7 +52,7 @@ export default function Dashboard() {
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
             {!registration && (
                 <>
-                    {time >= regStart ? (
+                    {time >= REG_START_TIME ? (
                         <Link href='/reg' className='btn' >Register for Ainmhícon 2026</Link>)
                         : (
                             <>
