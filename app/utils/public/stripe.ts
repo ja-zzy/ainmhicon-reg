@@ -1,6 +1,10 @@
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe('pk_test_51RZVRiQslLjui9q0o9lGDkJCewdUJXBG4ElapMIWGc1wAxBKpr5Nogs1IokzzpRJO4sv79IfUfb6x9hE1kBiTsLk00VSQ3Z9Tl');
+const stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PK
+
+if (!stripePublicKey) { throw new Error('Missing supabase environment variables, ensure NEXT_PUBLIC_STRIPE_PK is set for this machine') }
+
+const stripePromise = loadStripe(stripePublicKey);
 
 export async function handleCheckout(userId: string, priceId: string) {
     const res = await fetch('/api/create-checkout-session', {
@@ -8,7 +12,7 @@ export async function handleCheckout(userId: string, priceId: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ priceId, userId })
     })
-
+    if (res.status !== 200) { throw new Error(res.statusText) }
     const { sessionId } = await res.json();
     const stripe = await stripePromise;
     await stripe?.redirectToCheckout({ sessionId })

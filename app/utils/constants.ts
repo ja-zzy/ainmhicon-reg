@@ -1,0 +1,1 @@
+export const CURRENT_CON_ID = 1

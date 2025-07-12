@@ -4,3 +4,9 @@ export type Attendee = {
     pronouns: string
     phone: string
 }
+
+export type Registration = {
+    ticket_type: string
+    payment_status: string
+    badge_id: number
+}
