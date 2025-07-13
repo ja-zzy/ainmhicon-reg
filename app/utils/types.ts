@@ -5,8 +5,11 @@ export type Attendee = {
     phone: string
 }
 
-export type Registration = {
-    ticket_type: string
-    payment_status: string
-    badge_id: number
+export type RegistrationInfo = {
+    ticketDay: "saturday" | "sunday" | "weekend"
+    ticketTier: "standard" | "sponsor" | "founder"
+    nickname: string
+    legal_name: string
+    date_of_birth: Date
+    access_medical_details: string
 }
