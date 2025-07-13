@@ -2,8 +2,11 @@
 
 import { AuthWrapper } from '../components/authWrapper'
 
+import { handleCheckout } from '../utils/public/stripe';
 import { useAuth } from '../context/authContext';
 import Loading from '../components/loading';
+import { useState } from 'react';
+import ErrorMessage from '../components/errorMessage';
 import Link from 'next/link';
 
 export default function UserDetailsPage() {
@@ -13,6 +16,7 @@ export default function UserDetailsPage() {
     const SUNDAY = "SUNDAY"
     const WEEKEND = "WEEKEND"
     const STEP_TWO = "/reg/ticket-tier"
+    const [error, setError] = useState<string | null>(null)
 
     if (!user) { return <Loading /> }
 
@@ -67,8 +71,9 @@ export default function UserDetailsPage() {
                 </div>
             </div>
 
-            {/* <button className='btn' onClick={() => handleCheckout(user.id, 'price_1RiKMxQslLjui9q05yaSXxx5')}>Full Weekend</button> */}
+            {/* <button className='btn' onClick={() => handleCheckout(user.id, 'price_1RiKMxQslLjui9q05yaSXxx5').catch(e => setError(e.message))}>Full Weekend</button> */}
 
+            <ErrorMessage error={error} />
         </AuthWrapper >
     )
 }

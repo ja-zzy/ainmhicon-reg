@@ -1,6 +1,6 @@
 "use client"
 import { FormEventHandler, useState } from 'react'
-import { supabase } from '../utils/supabaseClient'
+import { supabase } from '../utils/public/supabase'
 import ErrorMessage from '../components/errorMessage'
 
 const checkEmailId = "login-carousel-check"

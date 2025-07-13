@@ -2,12 +2,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
-import { Attendee } from '../utils/types'
-import { supabase } from '../utils/supabaseClient'
+import { Attendee, Registration } from '../utils/types'
+import { supabase } from '../utils/public/supabase'
+import { CURRENT_CON_ID } from '../utils/constants'
 
 interface AuthState {
     user: User | null
     attendee: Attendee | null
+    registration: Registration | null
     loading: boolean
     error: string | null
 }
@@ -26,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
         attendee: null,
+        registration: null,
         loading: true,
         error: null
     })
@@ -46,11 +49,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setAuthState(prev => ({ ...prev, error: error.message, loading: false }))
                     return
                 }
-
                 if (session?.user) {
+                    setAuthState(prev => ({ ...prev, user: session.user }))
                     await fetchUserProfile(session.user)
+                    await fetchRegistration(session.user)
+                    setAuthState(prev => ({ ...prev, loading: false }))
                 } else {
-                    setAuthState({ user: null, attendee: null, loading: false, error: null })
+                    setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null })
                 }
             } catch (err) {
                 setAuthState(prev => ({
@@ -71,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (event === 'SIGNED_IN' && session?.user && session.user.id !== currentUserId) {
                     await fetchUserProfile(session.user)
                 } else if (event === 'SIGNED_OUT') {
-                    setAuthState({ user: null, attendee: null, loading: false, error: null })
+                    setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null })
                     router.replace('/login')
                 }
             }
@@ -129,12 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 return
             }
 
-            setAuthState({
-                user,
-                attendee,
-                loading: false,
-                error: null
-            })
+            setAuthState(prev => ({ ...prev, attendee }))
         } catch (err) {
             setAuthState(prev => ({
                 ...prev,
@@ -144,6 +144,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    const fetchRegistration = async (user: User) => {
+        try {
+            console.log('fetch user con registration')
+            setAuthState(prev => ({ ...prev, loading: true }))
+
+            const { data: registration, error } = await supabase
+                .from('registrations')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('convention_id', CURRENT_CON_ID)
+                .maybeSingle()
+
+            if (error) {
+                setAuthState(prev => ({
+                    ...prev,
+                    error: error.message,
+                    loading: false
+                }))
+                return
+            }
+
+            setAuthState(prev => ({ ...prev, registration }))
+        } catch (err) {
+            setAuthState(prev => ({
+                ...prev,
+                error: err instanceof Error ? err.message : 'Failed to fetch registration',
+                loading: false
+            }))
+        }
+    }
     const requireAuth = (allowIncompleteProfile = false) => {
         const { user, attendee, loading } = authState
 

@@ -1,66 +1,91 @@
 "use client"
 import Link from 'next/link'
-import { AuthWrapper } from '../components/authWrapper'
 import { useAuth } from '../context/authContext'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
+import { REG_START_TIME } from '../utils/constants'
 
-const regStart = 1754006400000
 export default function Dashboard() {
-    const { attendee, logout } = useAuth()
+    const { attendee, registration, logout } = useAuth()
     const [time, setTime] = useState(Date.now());
-
+    const [showCancelled, setShowCancelled] = useState(false);
     useEffect(() => {
         const interval = setInterval(() => setTime(Date.now()), 1000);
         return () => {
             clearInterval(interval);
         };
     }, []);
+
+
+    useEffect(() => {
+        if (window.location.hash === "#payment-cancelled") {
+            setShowCancelled(true);
+            // Remove hash to avoid repeat message
+            history.replaceState(null, "", window.location.pathname);
+        }
+    }, []);
+
     if (!attendee) { return null }
 
-    const duration = moment.duration(regStart - time);
+    const duration = moment.duration(REG_START_TIME - time);
     const days = Math.floor(duration.asDays());
     const hours = duration.hours();
     const minutes = duration.minutes();
     const seconds = duration.seconds();
     return (
         <>
+            <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-base-300 h-6 w-6 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 className="font-bold">Payment cancelled</h3>
+                    <div className="text-xs">Sorry, your payment did not complete. You have not been charged. Please try again later.</div>
+                </div>
+                <button className="btn btn-sm btn-secondary" onClick={() => setShowCancelled(false)}>Okay</button>
+            </div>
             <h2 className='font-[family-name:var(--font-sora)] text-xl'>
                 Welcome back, {attendee.first_name}!
             </h2>
-            <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>
-            <h3>Your Tasks</h3>
-            <Link href='/user-details' className='btn'>Update my details </Link>
-            <Link href='/reg-2026' className='btn btn-dash cursor-not-allowed pointer-events-none' >Register for Ainmhícon 2026 </Link>
-
-            <h3 className='mt-[8px]'>Reg Opens In</h3>
-            <div className="grid grid-flow-col gap-5 text-center auto-cols-max m-auto my-[16px]">
-                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                    <span className="countdown font-mono text-2xl">
-                        <span style={{ "--value": days } as React.CSSProperties} aria-live="polite" aria-label={days.toString()}>{days}</span>
-                    </span>
-                    days
-                </div>
-                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                    <span className="countdown font-mono text-2xl">
-                        <span style={{ "--value": hours } as React.CSSProperties} aria-live="polite" aria-label={hours.toString()}>{hours}</span>
-                    </span>
-                    hours
-                </div>
-                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                    <span className="countdown font-mono text-2xl">
-                        <span style={{ "--value": minutes } as React.CSSProperties} aria-live="polite" aria-label={minutes.toString()}>{minutes}</span>
-                    </span>
-                    min
-                </div>
-                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                    <span className="countdown font-mono text-2xl">
-                        <span style={{ "--value": seconds } as React.CSSProperties} aria-live="polite" aria-label={seconds.toString()}>{seconds}</span>
-                    </span>
-                    sec
-                </div>
-            </div>
-            <button onClick={() => logout()} className="btn btn-neutral mt-4 w-full mt-auto">Logout</button>
-        </>
-    )
+            {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
+            {registration && <p className='my-[8px]'>You are registered for Ainmhícon 2026!<br />Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>}
+            <Link href='/user-details' className='btn mt-8'>Update my details</Link>
+            {!registration && (
+                <>
+                    {time >= REG_START_TIME ? (
+                        <Link href='/reg' className='btn' >Register for Ainmhícon 2026</Link>)
+                        : (
+                            <>
+                                <h3 className='mt-[8px]'>Reg Opens In</h3>
+                                <div className="grid grid-flow-col gap-5 text-center auto-cols-max m-auto my-[16px]">
+                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                                        <span className="countdown font-mono text-2xl">
+                                            <span style={{ "--value": days } as React.CSSProperties} aria-live="polite" aria-label={days.toString()}>{days}</span>
+                                        </span>
+                                        days
+                                    </div>
+                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                                        <span className="countdown font-mono text-2xl">
+                                            <span style={{ "--value": hours } as React.CSSProperties} aria-live="polite" aria-label={hours.toString()}>{hours}</span>
+                                        </span>
+                                        hours
+                                    </div>
+                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                                        <span className="countdown font-mono text-2xl">
+                                            <span style={{ "--value": minutes } as React.CSSProperties} aria-live="polite" aria-label={minutes.toString()}>{minutes}</span>
+                                        </span>
+                                        min
+                                    </div>
+                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                                        <span className="countdown font-mono text-2xl">
+                                            <span style={{ "--value": seconds } as React.CSSProperties} aria-live="polite" aria-label={seconds.toString()}>{seconds}</span>
+                                        </span>
+                                        sec
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                </>)}
+            <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full ">Logout</button>
+        </>)
 }

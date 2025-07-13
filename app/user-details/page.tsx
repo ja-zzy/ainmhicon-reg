@@ -1,6 +1,6 @@
 "use client"
 import { ChangeEventHandler, FormEventHandler, MouseEventHandler, useEffect, useState } from 'react'
-import { supabase } from '../utils/supabaseClient'
+import { supabase } from '../utils/public/supabase'
 import { Attendee } from '../utils/types'
 import ErrorMessage from '../components/errorMessage'
 import { useRouter } from 'next/navigation'
