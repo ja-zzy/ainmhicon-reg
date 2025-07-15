@@ -3,28 +3,34 @@
 import { AuthWrapper } from "@/app/components/authWrapper"
 import Loading from "@/app/components/loading"
 import { useAuth } from "@/app/context/authContext"
-import { stripe } from "@/app/utils/private/stripe"
-import { RegistrationInfo } from "@/app/utils/types"
+import { getSelectedProduct, handleCheckout } from "@/app/utils/public/stripe"
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 const weekend = "weekend"
 const standard = "standard"
 
 export default function RegPersonalInfoPage() {
+    const { user } = useAuth()
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
+
+    if (!user) { return <Loading /> }
 
     const selectedDay = searchParams.get("day") ?? weekend
     const selectedTier = searchParams.get("tier") ?? standard
 
     async function goToCheckout() {
-        // Query correct Stripe product and provide checkout
         setLoading(true)
         const res = await getSelectedProduct(selectedDay, selectedTier)
         const productData = await res.json()
-        console.log(productData[0])
         setLoading(false)
+
+        try{
+            if (user) handleCheckout(user.id, productData.default_price)
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     return (
