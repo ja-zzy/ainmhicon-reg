@@ -18,26 +18,13 @@ export default function RegPersonalInfoPage() {
     const selectedDay = searchParams.get("day") ?? weekend
     const selectedTier = searchParams.get("tier") ?? standard
 
-    // const [tempRegInfo, setTempRegInfo] = useState<RegistrationInfo>(regInfo || {
-    //     ticketDay: "weekend",
-    //     ticketTier: "standard",
-    //     nickname: "",
-    //     legal_name: "",
-    //     date_of_birth: Date.now(),
-    //     access_medical_details: "",
-    //     emergency_contact: ""
-    // })
-
-    // useEffect(() => {
-    //     if (regInfo) {
-    //         setTempRegInfo(regInfo)
-    //     }
-    // }, [regInfo])
-
-    function goToCheckout() {
+    async function goToCheckout() {
         // Query correct Stripe product and provide checkout
         setLoading(true)
-        
+        const res = await getSelectedProduct(selectedDay, selectedTier)
+        const productData = await res.json()
+        console.log(productData[0])
+        setLoading(false)
     }
 
     return (
@@ -72,7 +59,7 @@ export default function RegPersonalInfoPage() {
                 <label className="label">Accessibility Information/Medical Details</label>
                 <textarea className="input"></textarea>
 
-                <button type="submit" className="btn btn-neutral mt-4 w-full">Proceed to Payment</button>
+                <button type="submit" className="btn btn-neutral mt-4 w-full">Submit</button>
             </form>
         </AuthWrapper>
     )

@@ -17,3 +17,13 @@ export async function handleCheckout(userId: string, priceId: string) {
     const stripe = await stripePromise;
     await stripe?.redirectToCheckout({ sessionId })
 }
+
+export async function getSelectedProduct(day: string, tier: string) {
+    const res = await fetch(`/api/get-selected-product?day=${encodeURIComponent(day)}&tier=${encodeURIComponent(tier)}`, {
+        method: 'GET',
+    })
+
+    if (res.status !== 200) { throw new Error(res.statusText) }
+
+    return res;
+}
