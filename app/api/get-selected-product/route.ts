@@ -2,6 +2,7 @@ import { stripe } from "@/app/utils/private/stripe";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
+    const SqlString = require("sqlstring");
     const { searchParams } = new URL(req.url);
     const day = searchParams.get("day");
     const tier = searchParams.get("tier");
@@ -10,7 +11,7 @@ export async function GET(req: Request) {
 
     try {
         const result = await stripe.products.search({
-            query: `active: \'true\' AND metadata[\'day\']: \'${day}\' AND metadata[\'tier\']: \'${tier}\'`,
+            query: `active: \'true\' AND metadata[\'day\']: ${SqlString.escape(day)} AND metadata[\'tier\']: ${SqlString.escape(tier)}`,
             limit: 1
         })
 

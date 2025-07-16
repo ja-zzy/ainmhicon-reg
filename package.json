@@ -17,6 +17,7 @@
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sqlstring": "^2.3.3",
     "stripe": "^18.3.0"
   },
   "devDependencies": {
