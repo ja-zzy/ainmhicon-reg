@@ -2,14 +2,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
-import { Attendee, Registration } from '../utils/types'
+import { Attendee, RegistrationInfo } from '../utils/types'
 import { supabase } from '../utils/public/supabase'
 import { CURRENT_CON_ID } from '../utils/constants'
 
 interface AuthState {
     user: User | null
     attendee: Attendee | null
-    registration: Registration | null
+    registration: RegistrationInfo | null
     loading: boolean
     error: string | null
 }
