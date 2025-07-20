@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const currentUserId = authState.user?.id
                 if (event === 'SIGNED_IN' && session?.user && session.user.id !== currentUserId) {
                     await fetchUserProfile(session.user)
+                    setAuthState(prev => ({ ...prev, loading: false }))
                 } else if (event === 'SIGNED_OUT') {
                     setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null })
                     router.replace('/login')
