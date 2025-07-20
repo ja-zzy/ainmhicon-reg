@@ -50,15 +50,24 @@ export default function UserDetailsPage() {
         if (!user?.id) { return }
         const file = e.target?.files?.[0]
         if (!file) return
-
+        setError('')
         const filePath = `${user.id}/profile_picture`
         const { error } = await supabase
             .storage
             .from('attendee-badge-images')
             .upload(filePath, file, { upsert: true })
 
-        if (error) { setError(error.message) }
-        else { refreshPicture(user.id) }
+        if (error) {
+            // @ts-ignore
+            if (error.error === "Payload too large") {
+                setError("Please select an image under 1MB")
+            }
+            else {
+                setError(error.message)
+            }
+        } else {
+            refreshPicture(user.id)
+        }
     }
 
     function navigateBack() {

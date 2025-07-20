@@ -110,7 +110,7 @@ export default function RegPage() {
             </ul>
 
             {/* Sliding Form Container */}
-            <div className="relative w-full overflow-hidden mb-auto">
+            <div className="relative w-full overflow-hidden mb-auto max-w-[80vw]">
                 <div
                     className="flex w-full h-full transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${currentStep * 100}%)` }}
