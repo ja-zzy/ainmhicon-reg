@@ -32,6 +32,8 @@ export default function Dashboard() {
     const hours = duration.hours();
     const minutes = duration.minutes();
     const seconds = duration.seconds();
+
+    const sufficientDetailToPurchaseTicket = attendee.first_name && attendee.last_name && attendee.dob
     return (
         <>
             <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
@@ -53,7 +55,11 @@ export default function Dashboard() {
             {!registration && (
                 <>
                     {time >= REG_START_TIME ? (
-                        <Link href='/reg' className='btn' >Register for Ainmhícon 2026</Link>)
+                        <>
+                            {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
+                            <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`} >Register for Ainmhícon 2026</Link>
+                        </>
+                    )
                         : (
                             <>
                                 <h3 className='mt-[8px]'>Reg Opens In</h3>

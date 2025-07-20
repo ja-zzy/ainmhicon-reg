@@ -28,7 +28,7 @@ export async function POST(req: Request) {
                 }
             ],
             mode: 'payment',
-            success_url: `${req.headers.get('origin')}/payment-success`,
+            success_url: `${req.headers.get('origin')}/reg#confirmation`,
             cancel_url: `${req.headers.get('origin')}/dashboard#payment-cancelled`,
             metadata: { userId }
         })

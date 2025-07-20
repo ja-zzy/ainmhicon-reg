@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .from('attendees')
                 .select('*')
                 .eq('user_id', user.id)
-                .single()
+                .maybeSingle()
 
             if (error) {
                 setAuthState(prev => ({
@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const { data: attendee, error } = await supabase
                 .from('attendees')
-                .upsert(updates)
+                .upsert({ user_id: authState.user.id, ...updates })
                 .eq('user_id', authState.user.id)
                 .select()
                 .single()

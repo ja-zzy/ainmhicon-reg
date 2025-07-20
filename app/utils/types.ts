@@ -3,6 +3,8 @@ export type Attendee = {
     last_name: string
     pronouns: string
     phone: string
+    dob: string
+    nickname: string
 }
 
 export type Registration = {

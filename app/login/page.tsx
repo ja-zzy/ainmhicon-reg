@@ -40,7 +40,7 @@ export default function LoginPage() {
                 </form>
             </div>
             <div id={checkEmailId} className="carousel-item relative w-full">
-                <p>Thanks, we've sent you an email. Please check your inbox</p>
+                <p>Thanks, we've sent you an email. Please check your inbox and spam box!</p>
             </div>
         </div>
     )

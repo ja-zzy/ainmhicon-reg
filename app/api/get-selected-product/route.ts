@@ -15,7 +15,7 @@ export async function GET(req: Request) {
             limit: 1
         })
 
-        return NextResponse.json(result.data);
+        return NextResponse.json(result.data[0]);
     } catch (e) {
         console.error("Can't find product", e);
         return new NextResponse("Can't find product", { status: 500 });
