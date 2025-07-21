@@ -47,7 +47,7 @@ export default function Dashboard() {
                 <button className="btn btn-sm btn-secondary" onClick={() => setShowCancelled(false)}>Okay</button>
             </div>
             <h2 className='font-[family-name:var(--font-sora)] text-xl'>
-                Welcome back, {attendee.first_name}!
+                Welcome back, {attendee.nickname}!
             </h2>
             {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <p className='my-[8px]'>You are registered for Ainmhícon 2026!<br />Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>}
