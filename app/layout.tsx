@@ -46,7 +46,7 @@ export default function RootLayout({
               </fieldset>
             </main>
             <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-              Copyright Ainmhicon 2025
+              Copyright Ainmhícon 2025
             </footer>
           </div>
         </AuthProvider>

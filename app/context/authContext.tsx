@@ -70,8 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [supabase, router])
 
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            // https://supabase.com/docs/reference/javascript/auth-onauthstatechange
+            setTimeout(async () => {
                 const currentUserId = authState.user?.id
                 if (event === 'SIGNED_IN' && session?.user && session.user.id !== currentUserId) {
                     await fetchUserProfile(session.user)
@@ -80,8 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null })
                     router.replace('/login')
                 }
-            }
-        )
+            }, 0)
+        })
         return () => { subscription.unsubscribe(); }
     }, [router, authState])
 
