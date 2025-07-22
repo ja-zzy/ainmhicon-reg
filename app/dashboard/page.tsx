@@ -68,6 +68,8 @@ export default function Dashboard() {
             </h2>
             {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <p className='my-[8px]'>You are registered for Ainmhícon 2026!<br /><b>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</b><br />Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>}
+            {registration && <p className='my=[8px]'><i>If you wish to cancel or upgrade your ticket please email: </i>reg@ainmhicon.ie</p>}
+
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
             {!registration && (
                 <>
