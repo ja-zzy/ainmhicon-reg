@@ -136,7 +136,8 @@ export default function UserDetailsPage() {
                     </div>
 
                     <div className="divider">Legal Information</div>
-                    <label>It's <b>very important</b> this matches your <a href='https://ainmhicon.ie/#faq'>Government Issued ID</a>, we won't be able to issue if it doesn't, so please double check!</label>
+                    <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/#faq' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
+                    <br />
                     <label className="label mt-2">First Name</label>
                     <input type="text" className="input" placeholder="Ceol" value={tempAttendee?.first_name || ''}
                         onChange={(e) => setTempAttendee({ ...tempAttendee, first_name: e.target.value })}
