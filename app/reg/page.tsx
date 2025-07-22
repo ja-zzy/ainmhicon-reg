@@ -127,7 +127,7 @@ export default function RegPage() {
                                     }}
                                     className={`btn btn-neutral w-full ${day === 'Weekend' && 'btn-primary'}`}
                                 >
-                                    Full Weekend
+                                    Full Weekend, 11th-12th April 2026
                                 </button>
                                 <button
                                     onClick={(e) => {
@@ -136,7 +136,7 @@ export default function RegPage() {
                                     }}
                                     className={`btn btn-neutral w-full ${day === 'Saturday' && 'btn-primary'}`}
                                 >
-                                    Saturday
+                                    Saturday, 11th April 2026
                                 </button>
                                 <button
                                     onClick={(e) => {
@@ -145,7 +145,7 @@ export default function RegPage() {
                                     }}
                                     className={`btn btn-neutral w-full ${day === 'Sunday' && 'btn-primary'}`}
                                 >
-                                    Sunday
+                                    Sunday, 12th April 2026
                                 </button>
                             </div>
                         </div>
