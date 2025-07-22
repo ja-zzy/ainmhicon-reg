@@ -25,6 +25,23 @@ export default function Dashboard() {
         }
     }, []);
 
+    function getAttendingDate(ticketType: string) {
+        switch (ticketType) {
+            case "Ainmhícon 2026 - Weekend Standard Ticket":
+            case "Ainmhícon 2026 - Weekend Sponsor Ticket":
+            case "Ainmhícon 2026 - Founder Package":
+                return "(11/04/2026) - (12/04/2026)";
+            case "Ainmhícon 2026 - Day Pass Saturday Standard Ticket":
+            case "Ainmhícon 2026 - Day Pass Saturday Sponsor Ticket":
+                return "(11/04/2026)"
+            case "Ainmhícon 2026 - Day Pass Sunday Standard Ticket":
+            case "Ainmhícon 2026 - Day Pass Sunday Sponsor Ticket":
+                return "(12/04/2026)";
+            default:
+                return "";
+        }
+    }
+
     if (!attendee) { return null }
 
     const duration = moment.duration(REG_START_TIME - time);
@@ -50,7 +67,7 @@ export default function Dashboard() {
                 Welcome back, {attendee.nickname}!
             </h2>
             {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
-            {registration && <p className='my-[8px]'>You are registered for Ainmhícon 2026!<br />Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>}
+            {registration && <p className='my-[8px]'>You are registered for Ainmhícon 2026!<br /><b>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</b><br />Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>}
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
             {!registration && (
                 <>
