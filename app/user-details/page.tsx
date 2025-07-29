@@ -1,5 +1,5 @@
 "use client"
-import { ChangeEventHandler, FormEventHandler, InvalidEvent, MouseEventHandler, useEffect, useState } from 'react'
+import { ChangeEventHandler, FormEventHandler, InvalidEvent, useEffect, useState } from 'react'
 import { supabase } from '../utils/public/supabase'
 import { Attendee } from '../utils/types'
 import ErrorMessage from '../components/errorMessage'
@@ -11,7 +11,7 @@ import Loading from '../components/loading'
 export default function UserDetailsPage() {
     const [error, setError] = useState<string | null>()
     const { attendee, user, updateProfile } = useAuth()
-    const [tempAttendee, setTempAttendee] = useState<Attendee>(attendee || { first_name: '', last_name: '', phone: '', pronouns: '', dob: '', nickname: '' })
+    const [tempAttendee, setTempAttendee] = useState<Attendee>(attendee || { first_name: '', last_name: '', phone: '', pronouns: '', dob: '', nickname: '', emergency_contact_name: '', emergency_contact_phone: '', medical_info: '' })
     const [userProfilePic, setUserProfilePic] = useState<'loading' | string | undefined>('loading')
     const [updatePending, setUpdatePending] = useState(false)
 
@@ -171,8 +171,21 @@ export default function UserDetailsPage() {
                         onChange={(e) => setTempAttendee({ ...tempAttendee, pronouns: e.target.value })}
                     />
 
+                    <label className="label mt-2">Emergency Contact Name</label>
+                    <input type="text" className="input mb-3" placeholder='Seán Gull' value={tempAttendee?.emergency_contact_name || ''}
+                        onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_name: e.target.value })}
+                    />
+
+                    <label className='label mt-2'>Emergency Contact Number</label>
+                    <input type='text' className='input mb-3' placeholder='085 987 65432' value={tempAttendee?.emergency_contact_phone || ''}
+                        onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_phone: e.target.value })}
+                    />
+
                     <label className="label mt-2 ">Accessibility Information and Medical Details</label>
-                    <textarea className="input min-h-[90px] rounded-xl p-[10px] whitespace-normal" placeholder='Let us know about any extra requirements we might be able to help with'></textarea>
+                    <textarea className="input min-h-[90px] rounded-xl p-[10px] whitespace-normal" placeholder='Let us know about any extra requirements we might be able to help with'
+                        value={tempAttendee?.medical_info || ''}
+                        onChange={(e) => setTempAttendee({ ...tempAttendee, medical_info: e.target.value })}>
+                    </textarea>
 
                     <ErrorMessage error={error} />
                     <button type="submit" className="btn btn-neutral mt-4 w-full">Update</button>

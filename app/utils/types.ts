@@ -5,6 +5,9 @@ export type Attendee = {
     phone: string
     dob: string
     nickname: string
+    emergency_contact_name: string
+    emergency_contact_phone: string
+    medical_info: string
 }
 
 export type Registration = {
