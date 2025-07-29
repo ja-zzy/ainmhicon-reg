@@ -47,6 +47,7 @@ export default function RootLayout({
             </main>
             <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
               Copyright Ainmhícon 2025
+              Ainmhícon, Company Limited by Guarantee, Company No. 793565
             </footer>
           </div>
         </AuthProvider>
