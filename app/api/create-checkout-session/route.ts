@@ -14,6 +14,8 @@ export async function POST(req: Request) {
         .eq('convention_id', CURRENT_CON_ID)
         .maybeSingle()
 
+    const couponId = await getActiveCouponId();
+
     if (error) {
         return new Response(new Blob(), { status: 500, statusText: "Error finding user with id " + userId })
     } else if (registration) {
@@ -28,6 +30,9 @@ export async function POST(req: Request) {
                 }
             ],
             mode: 'payment',
+            discounts: [{
+                coupon: couponId,
+            }],
             success_url: `${req.headers.get('origin')}/reg#confirmation`,
             cancel_url: `${req.headers.get('origin')}/dashboard#payment-cancelled`,
             metadata: { userId }
@@ -37,4 +42,16 @@ export async function POST(req: Request) {
     } catch {
         return new Response(new Blob(), { status: 500, statusText: "Stripe checkout error" })
     }
+}
+
+async function getActiveCouponId() {
+    const coupons = await stripe.coupons.list();
+
+    const earlyBird = coupons.data.find((c) => c.name === 'Early Bird Discount (Until Oct 4th)');
+    if (earlyBird?.valid)
+        return earlyBird.id;
+
+    const standard = coupons.data.find((c) => c.name === 'Standard Fare (Until Jan 4th)');
+    if (standard?.valid)
+        return standard.id;
 }
