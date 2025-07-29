@@ -71,6 +71,8 @@ export default function Dashboard() {
             {registration && <p className='my=[8px]'><i>If you wish to cancel or upgrade your ticket please email: </i>reg@ainmhicon.ie</p>}
 
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
+            {registration && <Link href='/hotel-booking' className='btn mt-8'>Booking the Venue Hotel</Link>}
+
             {!registration && (
                 <>
                     {time >= REG_START_TIME ? (
