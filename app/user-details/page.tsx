@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../context/authContext'
 import { AuthWrapper } from '../components/authWrapper'
 import Loading from '../components/loading'
+import Avatar from './avatar'
 
 export default function UserDetailsPage() {
     const [error, setError] = useState<string | null>()
@@ -46,27 +47,29 @@ export default function UserDetailsPage() {
             .catch((e) => setError(e.message))
     }
 
-    const imageChangeHandler: ChangeEventHandler<HTMLInputElement> = async (e) => {
-        if (!user?.id) { return }
-        const file = e.target?.files?.[0]
-        if (!file) return
-        setError('')
-        const filePath = `${user.id}/profile_picture`
-        const { error } = await supabase
-            .storage
+    const imageChangeHandler = async (blob: Blob) => {
+        if (!user?.id) return;
+        setUserProfilePic('loading')
+
+        setError('');
+        const filePath = `${user.id}/profile_picture`;
+
+        const { error } = await supabase.storage
             .from('attendee-badge-images')
-            .upload(filePath, file, { upsert: true })
+            .upload(filePath, blob, {
+                contentType: 'image/jpeg',
+                upsert: true,
+            });
 
         if (error) {
             // @ts-ignore
-            if (error.error === "Payload too large") {
-                setError("Please select an image under 1MB")
-            }
-            else {
-                setError(error.message)
+            if (error.error === 'Payload too large') {
+                setError('Please select an image under 1MB');
+            } else {
+                setError(error.message);
             }
         } else {
-            refreshPicture(user.id)
+            refreshPicture(user.id);
         }
     }
 
@@ -123,18 +126,7 @@ export default function UserDetailsPage() {
                 <form onSubmit={handleUpdate} className='p-2'>
 
                     <h2 className='font-[family-name:var(--font-sora)] text-xl mb-3'>Your Details</h2>
-                    <div className={`avatar flex flex-col justify-center me-3 min-h-[96px] ${userProfilePic === 'loading' || !userProfilePic ? 'avatar-placeholder' : ''}`}>
-                        <label htmlFor='profile-picture' className={`w-24 rounded-full m-auto cursor-pointer relative group overflow-hidden text-black ${userProfilePic === 'loading' || !userProfilePic ? 'bg-base-100' : ''}`}>
-                            {userProfilePic === 'loading' && <Loading />}
-                            {!userProfilePic && <div className="text-l w-[96px] h-[96px] flex justify-center items-center text-center">No Badge!</div>}
-                            {userProfilePic && userProfilePic !== 'loading' && <img src={userProfilePic} className='aspect-square' />}
-                            <div className='absolute top-[100%] w-[100%] h-[100%] text-center bg-neutral/30 transition-all duration-150 ease-out backdrop-blur-xs text-white flex items-center justify-center  group-hover:top-[0%]'>
-                                <i className=''>Change<br />Picture</i>
-                            </div>
-                        </label>
-                        <input onChange={imageChangeHandler} type='file' accept='image/png, image/jpeg' id='profile-picture' className='hidden' />
-                    </div>
-
+                    <Avatar userProfilePic={userProfilePic} onImageChanged={imageChangeHandler} />
                     <div className="divider">Legal Information</div>
                     <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/#faq' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
                     <br />
