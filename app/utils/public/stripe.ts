@@ -27,3 +27,12 @@ export async function getSelectedProduct(day: string, tier: string) {
 
     return res;
 }
+
+export async function getTicketStock() {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/get-ticket-stock`, {method: 'GET'})
+
+    if (res.status !== 200) { throw new Error(res.statusText) }
+
+    return await res.json();
+}
