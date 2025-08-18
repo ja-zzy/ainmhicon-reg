@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { useAuth } from '../context/authContext'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
-import { REG_START_TIME } from '../utils/constants'
+
+const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 
 export default function Dashboard() {
     const { attendee, registration, logout } = useAuth()
@@ -44,7 +45,7 @@ export default function Dashboard() {
 
     if (!attendee) { return null }
 
-    const duration = moment.duration(REG_START_TIME - time);
+    const duration = moment.duration(regStartTime - time);
     const days = Math.floor(duration.asDays());
     const hours = duration.hours();
     const minutes = duration.minutes();
@@ -67,15 +68,19 @@ export default function Dashboard() {
                 Welcome back, {attendee.nickname}!
             </h2>
             {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
-            {registration && <p className='my-[8px]'>You are registered for Ainmhícon 2026!<br /><b>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</b><br />Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>}
-            {registration && <p className='my=[8px]'><i>If you wish to cancel or upgrade your ticket please email: </i>reg@ainmhicon.ie</p>}
+            {registration && <>
+                <p className='my-[8px]'>You are registered for Ainmhícon 2026!</p>
+                <p className='text-center font-bold'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
+                <p className='my-[8px]'>Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>
+            </>}
+            {registration && <p className='my=[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
 
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
-            {registration && <Link href='/hotel-booking' className='btn mt-8'>Booking the Venue Hotel</Link>}
+            {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
 
             {!registration && (
                 <>
-                    {time >= REG_START_TIME ? (
+                    {time >= regStartTime ? (
                         <>
                             {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
                             <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`} >Register for Ainmhícon 2026</Link>

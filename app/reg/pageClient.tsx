@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { getSelectedProduct, handleCheckout } from "../utils/public/stripe";
 import { useAuth } from "../context/authContext";
 
+const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
+
 type AttendanceDay = 'Saturday' | 'Sunday' | 'Weekend'
 type Tier = 'Standard' | 'Sponsor' | 'Founder'
 
@@ -23,7 +25,7 @@ type TicketProps = {
 }
 
 export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProps) {
-    const router = useRouter()
+const router = useRouter()
     const { user, attendee } = useAuth()
 
     const [currentStep, setCurrentStep] = useState(window.location.hash === '#confirmation' ? 3 : 0)
@@ -31,9 +33,19 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
     const [tier, setTier] = useState<Tier | null>(null)
     const [loadingPayment, setLoadingPayment] = useState(false)
 
+    function canBackStep() {
+        return currentStep > 0 && currentStep < 3
+    }
+
+    function canForwardStep() {
+        if (currentStep === 0) { return day !== null }
+        if (currentStep === 1) { return tier !== null }
+        return false
+    }
+
     // Redirect to dashboard if attendee info not complete
     useEffect(() => {
-        if (!attendee?.first_name || !attendee.last_name || !attendee.dob) {
+        if (!attendee?.first_name || !attendee.last_name || !attendee.dob || Date.now() < regStartTime) {
             router.push('/dashboard')
         }
     }, [attendee])
@@ -115,144 +127,146 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
             </ul>
 
             {/* Sliding Form Container */}
-            <div className="relative w-full overflow-hidden mb-auto max-w-[80vw]">
-                <div
-                    className="flex w-full h-full transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${currentStep * 100}%)` }}
-                >
-                    {/* Step 1: Attendance */}
-                    <div className="min-w-full w-full flex-shrink-0 p-2">
-                        <div>
-                            <h2 className='font-[family-name:var(--font-sora)] text-xl mb-6'>Choose your Attendance Days</h2>
-                            <div className="space-y-4">
-                                <button
-                                    onClick={(e) => {
-                                        console.log(saturdayDisabled)
-                                        console.log(sundayDisabled)
-                                        setDay('Weekend' as AttendanceDay);
-                                        setCurrentStep(STEPS.TIER);
-                                    }}
-                                    className={`btn btn-neutral w-full ${day === 'Weekend' && 'btn-primary'}`}
-                                    disabled={saturdayDisabled && sundayDisabled}
-                                >
-                                    Full Weekend, 11th-12th April 2026
-                                    {saturdayDisabled && sundayDisabled && " SOLD OUT"}
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        setDay('Saturday' as AttendanceDay);
-                                        setCurrentStep(STEPS.TIER);
-                                    }}
-                                    className={`btn btn-neutral w-full ${day === 'Saturday' && 'btn-primary'}`}
-                                    disabled={saturdayDisabled}
-                                >
-                                    Saturday, 11th April 2026
-                                    {saturdayDisabled && " SOLD OUT"}
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        setDay('Sunday' as AttendanceDay);
-                                        setCurrentStep(STEPS.TIER);
-                                    }}
-                                    className={`btn btn-neutral w-full ${day === 'Sunday' && 'btn-primary'}`}
-                                    disabled={sundayDisabled}
-                                >
-                                    Sunday, 12th April 2026
-                                    {sundayDisabled && " SOLD OUT"}
-                                </button>
+            <div className="flex flex-row items-center justify-around">
+                {<button className={`btn btn-circle w-[2rem] h-[2rem] btn-neutral mt-[53px] opacity-${canBackStep() ? '100' : '0'} transition-all duration-200`} onClick={() => { if (canBackStep()) { setCurrentStep(currentStep - 1) } }}>&lt;</button>}
+                <div className="relative w-[75%] overflow-hidden mb-auto max-w-[80vw] ">
+                    <div
+                        className="flex w-full h-full transition-transform duration-500 ease-in-out"
+                        style={{ transform: `translateX(-${currentStep * 100}%)` }}
+                    >
+                        {/* Step 1: Attendance */}
+                        <div className="min-w-full w-full flex-shrink-0 p-2">
+                            <div>
+                                <h2 className='font-[family-name:var(--font-sora)] text-xl mb-6'>Choose your Attendance Days</h2>
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={(e) => {
+                                            setDay('Weekend' as AttendanceDay);
+                                            setCurrentStep(STEPS.TIER);
+                                        }}
+                                        className={`btn btn-neutral w-full ${day === 'Weekend' && 'btn-primary'}`}
+                                        disabled={saturdayDisabled && sundayDisabled}
+                                    >
+                                        Full Weekend, 11th-12th April 2026
+                                        {saturdayDisabled && sundayDisabled && " SOLD OUT"}
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            setDay('Saturday' as AttendanceDay);
+                                            setCurrentStep(STEPS.TIER);
+                                        }}
+                                        className={`btn btn-neutral w-full ${day === 'Saturday' && 'btn-primary'}`}
+                                        disabled={saturdayDisabled}
+                                    >
+                                        Saturday, 11th April 2026
+                                        {saturdayDisabled && " SOLD OUT"}
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            setDay('Sunday' as AttendanceDay);
+                                            setCurrentStep(STEPS.TIER);
+                                        }}
+                                        className={`btn btn-neutral w-full ${day === 'Sunday' && 'btn-primary'}`}
+                                        disabled={sundayDisabled}
+                                    >
+                                        Sunday, 12th April 2026
+                                        {sundayDisabled && " SOLD OUT"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Step 2: Tier */}
-                    <div className="min-w-full w-full flex-shrink-0 p-2">
-                        <div>
-                            <h2 className='font-[family-name:var(--font-sora)] text-xl mb-6'>Choose your Tier</h2>
-                            <div className="space-y-4">
-                                <button
-                                    onClick={() => {
-                                        setTier('Standard' as Tier);
-                                        setCurrentStep(STEPS.PAYMENT);
-                                    }}
-                                    className={`btn btn-neutral w-full ${tier === 'Standard' && 'btn-primary'}`}
-                                >
-                                    Standard
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setTier('Sponsor' as Tier);
-                                        setCurrentStep(STEPS.PAYMENT);
-                                    }}
-                                    className={`btn btn-neutral w-full ${tier === 'Sponsor' && 'btn-primary'}`}
-                                >
-                                    Sponsor
-                                </button>
-                                {day === 'Weekend' && (
+                        {/* Step 2: Tier */}
+                        <div className="min-w-full w-full flex-shrink-0 p-2">
+                            <div>
+                                <h2 className='font-[family-name:var(--font-sora)] text-xl mb-6'>Choose your Tier</h2>
+                                <div className="space-y-4">
                                     <button
                                         onClick={() => {
-                                            setTier('Founder' as Tier);
+                                            setTier('Standard' as Tier);
                                             setCurrentStep(STEPS.PAYMENT);
                                         }}
-                                        className={`btn btn-neutral w-full ${tier === 'Founder' && 'btn-primary'}`}
+                                        className={`btn btn-neutral w-full ${tier === 'Standard' && 'btn-primary'}`}
                                     >
-                                        Founder
+                                        Standard
                                     </button>
-                                )}
+                                    <button
+                                        onClick={() => {
+                                            setTier('Sponsor' as Tier);
+                                            setCurrentStep(STEPS.PAYMENT);
+                                        }}
+                                        className={`btn btn-neutral w-full ${tier === 'Sponsor' && 'btn-primary'}`}
+                                    >
+                                        Sponsor
+                                    </button>
+                                    {day === 'Weekend' && (
+                                        <button
+                                            onClick={() => {
+                                                setTier('Founder' as Tier);
+                                                setCurrentStep(STEPS.PAYMENT);
+                                            }}
+                                            className={`btn btn-neutral w-full ${tier === 'Founder' && 'btn-primary'}`}
+                                        >
+                                            Founder
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Step 3: Payment */}
-                    <div className="min-w-full  w-full flex-shrink-0 p-2">
-                        <div>
-                            <h2 className='font-[family-name:var(--font-sora)] text-xl mb-6'>Pay for your ticket</h2>
-                            <p className="mb-6">To secure your <b>{day} {tier}</b> ticket please click below to pay securely via Stripe</p>
-                            <button
-                                onClick={async () => {
-                                    if (!day || !tier) return;
+                        {/* Step 3: Payment */}
+                        <div className="min-w-full  w-full flex-shrink-0 p-2">
+                            <div>
+                                <h2 className='font-[family-name:var(--font-sora)] text-xl mb-6'>Pay for your ticket</h2>
+                                <p className="mb-6">To secure your <b>{day} {tier}</b> ticket please click below to pay securely via Stripe</p>
+                                <button
+                                    onClick={async () => {
+                                        if (!day || !tier) return;
 
-                                    setLoadingPayment(true);
+                                        setLoadingPayment(true);
 
-                                    try {
-                                        const res = await getSelectedProduct(day, tier);
-                                        const productData = await res.json();
+                                        try {
+                                            const res = await getSelectedProduct(day, tier);
+                                            const productData = await res.json();
 
-                                        if (user) {
-                                            await handleCheckout(user.id, productData.default_price);
+                                            if (user) {
+                                                await handleCheckout(user.id, productData.default_price);
+                                            }
+                                        } catch (e) {
+                                            console.error(e);
+                                            setLoadingPayment(false);
                                         }
-                                    } catch (e) {
-                                        console.error(e);
-                                        setLoadingPayment(false);
-                                    }
-                                }}
-                                className="btn btn-neutral w-full"
-                                disabled={loadingPayment}
-                            >
-                                {loadingPayment && <span className="loading loading-ring loading-md mr-2"></span>}
-                                {loadingPayment ? 'Processing...' : 'Pay now'}
-                            </button>
+                                    }}
+                                    className="btn btn-neutral w-full"
+                                    disabled={loadingPayment}
+                                >
+                                    {loadingPayment && <span className="loading loading-ring loading-md mr-2"></span>}
+                                    {loadingPayment ? 'Processing...' : 'Pay now'}
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Step 4: Confirmation */}
-                    <div className="min-w-full w-full flex-shrink-0 p-2">
-                        <div className="text-center">
-                            <h2 className='font-[family-name:var(--font-sora)] text-xl mb-4'>
-                                You're going to Ainmhícon!
-                            </h2>
-                            <p className='mb-6'>
-                                Thank you, we've received your payment! We'll be in touch with more details soon.
-                                In the meantime, you can update your details whenever you like from the dashboard
-                            </p>
-                            <button
-                                className='btn btn-primary'
-                                onClick={() => router.push('/dashboard')}
-                            >
-                                Return to dashboard
-                            </button>
+                        {/* Step 4: Confirmation */}
+                        <div className="min-w-full w-full flex-shrink-0 p-2">
+                            <div className="text-center">
+                                <h2 className='font-[family-name:var(--font-sora)] text-xl mb-4'>
+                                    You're going to Ainmhícon!
+                                </h2>
+                                <p className='mb-6'>
+                                    Thank you, we've received your payment! We'll be in touch with more details soon.
+                                    In the meantime, you can update your details whenever you like from the dashboard
+                                </p>
+                                <button
+                                    className='btn btn-primary'
+                                    onClick={() => router.push('/dashboard')}
+                                >
+                                    Return to dashboard
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {<button className={`btn btn-circle w-[2rem] h-[2rem] btn-neutral mt-[53px] opacity-${canForwardStep() ? '100' : '0'} transition-all duration-200`} onClick={() => { if (canForwardStep()) { setCurrentStep(currentStep + 1) } }}>&gt;</button>}
             </div>
         </AuthWrapper>
     )
