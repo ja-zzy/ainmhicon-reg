@@ -25,13 +25,32 @@ type TicketProps = {
 }
 
 export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProps) {
-const router = useRouter()
+    const router = useRouter()
     const { user, attendee } = useAuth()
 
     const [currentStep, setCurrentStep] = useState(window.location.hash === '#confirmation' ? 3 : 0)
     const [day, setDay] = useState<AttendanceDay | null>(null)
     const [tier, setTier] = useState<Tier | null>(null)
     const [loadingPayment, setLoadingPayment] = useState(false)
+
+    function validateTicketStock(day: string): void {
+        const soldOutError = new Error("Tickets are sold out for selected date(s)");
+
+        switch (day) {
+            case 'Saturday':
+                if (!saturdayDisabled) return
+            case 'Sunday':
+                if (!sundayDisabled) return
+            case 'Weekend':
+            default:
+                if (!weekendDisabled()) return
+        }
+        throw soldOutError;
+    }
+
+    function weekendDisabled(): boolean {
+        return saturdayDisabled || sundayDisabled;
+    }
 
     function canBackStep() {
         return currentStep > 0 && currentStep < 3
@@ -145,10 +164,10 @@ const router = useRouter()
                                             setCurrentStep(STEPS.TIER);
                                         }}
                                         className={`btn btn-neutral w-full ${day === 'Weekend' && 'btn-primary'}`}
-                                        disabled={saturdayDisabled && sundayDisabled}
+                                        disabled={weekendDisabled()}
                                     >
                                         Full Weekend, 11th-12th April 2026
-                                        {saturdayDisabled && sundayDisabled && " SOLD OUT"}
+                                        {(weekendDisabled()) && " SOLD OUT"}
                                     </button>
                                     <button
                                         onClick={(e) => {
@@ -228,6 +247,8 @@ const router = useRouter()
                                         try {
                                             const res = await getSelectedProduct(day, tier);
                                             const productData = await res.json();
+
+                                            validateTicketStock(day)
 
                                             if (user) {
                                                 await handleCheckout(user.id, productData.default_price);
