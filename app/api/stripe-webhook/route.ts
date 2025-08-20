@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import { stripe, stripeWebhookSecret } from '@/app/utils/private/stripe';
 import { supabase } from '@/app/utils/private/supabase';
+import { updateTicketStock } from '@/app/utils/public/stripe';
 
 export async function POST(req: Request) {
     const rawBody = Buffer.from(await req.arrayBuffer())
@@ -42,7 +43,9 @@ export async function POST(req: Request) {
                 return new NextResponse('Error updating registration', { status: 500 });
             }
 
+            updateTicketStock(ticketType);
             break;
-    }
+        }
+
     return new NextResponse('OK', { status: 200 })
 }

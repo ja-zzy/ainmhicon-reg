@@ -30,9 +30,20 @@ export async function getSelectedProduct(day: string, tier: string) {
 
 export async function getTicketStock() {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/get-ticket-stock`, {method: 'GET'})
+    const res = await fetch(`${baseUrl}/api/get-ticket-stock`, { method: 'GET' })
 
     if (res.status !== 200) { throw new Error(res.statusText) }
 
     return await res.json();
+}
+
+export async function updateTicketStock(ticketType: string) {
+    const res = await fetch(`/api/update-ticket-stock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ticketType),
+    })
+    if (res.status !== 200) { throw new Error(res.statusText) }
+    
+    return res.status;
 }
