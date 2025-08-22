@@ -38,7 +38,8 @@ export async function getTicketStock() {
 }
 
 export async function updateTicketStock(ticketType: string) {
-    const res = await fetch(`/api/update-ticket-stock`, {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/update-ticket-stock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ticketType),

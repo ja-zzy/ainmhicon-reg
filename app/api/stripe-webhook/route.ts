@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     try {
         event = stripe.webhooks.constructEvent(rawBody, signature, stripeWebhookSecret)
-    } catch {
+    } catch (e) {
         console.error(`Received bad event from stripe, signature verification failed!`)
         return new NextResponse('Not allowed', { status: 400 })
     }
@@ -33,19 +33,19 @@ export async function POST(req: Request) {
 
             const lineItems = await stripe.checkout.sessions.listLineItems(event.data.object.id);
             const ticketType = lineItems.data[0]?.description || 'Unknown';
-
+            await updateTicketStock(ticketType);
+            
             const { error } = await supabase
-                .from('registrations')
-                .upsert({ user_id: userId, payment_status: 'paid', convention_id: 1, ticket_type: ticketType })
-
+            .from('registrations')
+            .upsert({ user_id: userId, payment_status: 'paid', convention_id: 1, ticket_type: ticketType })
+            
             if (error) {
                 console.error('Supabase error when updating paid status', error);
                 return new NextResponse('Error updating registration', { status: 500 });
             }
 
-            updateTicketStock(ticketType);
             break;
-        }
+    }
 
     return new NextResponse('OK', { status: 200 })
 }

@@ -40,4 +40,5 @@ export async function POST(req: Request) {
         console.error("Encountered an error while trying to update ticket data")
         return new NextResponse("Encountered an error while trying to update ticket data", { status: 500 })
     }
+    return new NextResponse(null, { status: 200 });
 }
