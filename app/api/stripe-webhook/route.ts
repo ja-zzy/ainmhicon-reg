@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     try {
         event = stripe.webhooks.constructEvent(rawBody, signature, stripeWebhookSecret)
-    } catch (e) {
+    } catch {
         console.error(`Received bad event from stripe, signature verification failed!`)
         return new NextResponse('Not allowed', { status: 400 })
     }
