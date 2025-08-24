@@ -36,15 +36,3 @@ export async function getTicketStock() {
 
     return await res.json();
 }
-
-export async function updateTicketStock(ticketType: string) {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/update-ticket-stock`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ticketType),
-    })
-    if (res.status !== 200) { throw new Error(res.statusText) }
-    
-    return res.status;
-}

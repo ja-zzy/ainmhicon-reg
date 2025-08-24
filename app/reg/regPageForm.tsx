@@ -12,6 +12,8 @@ const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 type AttendanceDay = 'Saturday' | 'Sunday' | 'Weekend'
 type Tier = 'Standard' | 'Sponsor' | 'Founder'
 
+const soldOut = ' SOLD OUT'
+
 const STEPS = {
     ATTENDANCE: 0,
     TIER: 1,
@@ -24,7 +26,7 @@ type TicketProps = {
     sundayDisabled: boolean
 }
 
-export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProps) {
+export default function RegPageForm({ saturdayDisabled, sundayDisabled }: TicketProps) {
     const router = useRouter()
     const { user, attendee } = useAuth()
 
@@ -32,6 +34,8 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
     const [day, setDay] = useState<AttendanceDay | null>(null)
     const [tier, setTier] = useState<Tier | null>(null)
     const [loadingPayment, setLoadingPayment] = useState(false)
+
+    const weekendDisabled = saturdayDisabled || sundayDisabled
 
     function validateTicketStock(day: string): void {
         const soldOutError = new Error("Tickets are sold out for selected date(s)");
@@ -43,13 +47,9 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
                 if (!sundayDisabled) return
             case 'Weekend':
             default:
-                if (!weekendDisabled()) return
+                if (!weekendDisabled) return
         }
         throw soldOutError;
-    }
-
-    function weekendDisabled(): boolean {
-        return saturdayDisabled || sundayDisabled;
     }
 
     function canBackStep() {
@@ -164,10 +164,10 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
                                             setCurrentStep(STEPS.TIER);
                                         }}
                                         className={`btn btn-neutral w-full ${day === 'Weekend' && 'btn-primary'}`}
-                                        disabled={weekendDisabled()}
+                                        disabled={weekendDisabled}
                                     >
                                         Full Weekend, 11th-12th April 2026
-                                        {(weekendDisabled()) && " SOLD OUT"}
+                                        {(weekendDisabled) && soldOut}
                                     </button>
                                     <button
                                         onClick={(e) => {
@@ -178,7 +178,7 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
                                         disabled={saturdayDisabled}
                                     >
                                         Saturday, 11th April 2026
-                                        {saturdayDisabled && " SOLD OUT"}
+                                        {saturdayDisabled && soldOut}
                                     </button>
                                     <button
                                         onClick={(e) => {
@@ -189,7 +189,7 @@ export default function RegPage({ saturdayDisabled, sundayDisabled }: TicketProp
                                         disabled={sundayDisabled}
                                     >
                                         Sunday, 12th April 2026
-                                        {sundayDisabled && " SOLD OUT"}
+                                        {sundayDisabled && soldOut}
                                     </button>
                                 </div>
                             </div>

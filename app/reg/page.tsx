@@ -1,5 +1,5 @@
 import { getTicketStock as getTicketStock } from "../utils/public/stripe";
-import RegPage from "./pageClient";
+import RegPageForm from "./regPageForm";
 
 export default async function RegTicketStock() {
     const data = await getTicketStock()
@@ -14,7 +14,7 @@ export default async function RegTicketStock() {
 
 
     return (
-        <RegPage
+        <RegPageForm
             saturdayDisabled={saturdayDisabled}
             sundayDisabled={sundayDisabled}
         />

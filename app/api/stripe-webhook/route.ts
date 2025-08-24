@@ -1,9 +1,8 @@
 import Stripe from 'stripe';
 
 import { NextResponse } from 'next/server';
-import { stripe, stripeWebhookSecret } from '@/app/utils/private/stripe';
+import { stripe, stripeWebhookSecret, updateTicketStock } from '@/app/utils/private/stripe';
 import { supabase } from '@/app/utils/private/supabase';
-import { updateTicketStock } from '@/app/utils/public/stripe';
 
 export async function POST(req: Request) {
     const rawBody = Buffer.from(await req.arrayBuffer())
