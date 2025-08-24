@@ -4,6 +4,7 @@ import { supabase } from '@/app/utils/private/supabase';
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 const overrideUserId = process.env.OVERRIDE_USER_ID
+const cocLink = process.env.CODE_OF_CONDUCT_LINK
 
 export async function POST(req: Request) {
     const { priceId, userId } = await req.json()
@@ -39,7 +40,15 @@ export async function POST(req: Request) {
             }],
             success_url: `${req.headers.get('origin')}/reg#confirmation`,
             cancel_url: `${req.headers.get('origin')}/dashboard#payment-cancelled`,
-            metadata: { userId }
+            metadata: { userId },
+            consent_collection: {
+                terms_of_service: 'required',
+            },
+            custom_text: {
+                terms_of_service_acceptance: {
+                    message: `I agree to Ainmhícon's [Code of Conduct](${cocLink})`,
+                },
+            },
         })
 
         return Response.json({ sessionId: session.id })
