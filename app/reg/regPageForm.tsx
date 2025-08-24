@@ -251,7 +251,7 @@ export default function RegPageForm({ saturdayDisabled, sundayDisabled }: Ticket
                                             validateTicketStock(day)
 
                                             if (user) {
-                                                await handleCheckout(user.id, productData.default_price);
+                                                await handleCheckout(user.id, productData.default_price, day);
                                             }
                                         } catch (e) {
                                             console.error(e);

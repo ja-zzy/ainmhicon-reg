@@ -1,12 +1,13 @@
 import { CURRENT_CON_ID } from '@/app/utils/constants';
 import { stripe } from '@/app/utils/private/stripe';
 import { supabase } from '@/app/utils/private/supabase';
+import { getTicketStock } from '@/app/utils/public/stripe';
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 
 export async function POST(req: Request) {
     if (Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
-    const { priceId, userId } = await req.json()
+    const { priceId, userId, selectedDay } = await req.json()
 
     // We shouldn't let a user pay again if they're already registered, that'd be complicated
     const { data: registration, error } = await supabase
@@ -18,7 +19,27 @@ export async function POST(req: Request) {
 
     const couponId = await getActiveCouponId();
 
-    if (error) {
+    const ticketStock = await getTicketStock();
+
+    const isSoldOut = (day: string) => {
+        const sold = parseInt(ticketStock[`tickets_sold_${day}`]);
+        const capacity = parseInt(ticketStock[`venue_capacity_${day}`]);
+
+        return sold >= capacity;
+    }
+
+    const saturdaySoldOut = isSoldOut("sat")
+    const sundaySoldOut = isSoldOut("sun")
+    const weekendSoldOut = saturdaySoldOut || sundaySoldOut
+
+    const selectedDaySoldOut =
+        (selectedDay === "Saturday" && saturdaySoldOut) ||
+        (selectedDay === "Sunday" && sundaySoldOut) ||
+        (selectedDay === "Weekend" && weekendSoldOut)
+
+    if (selectedDaySoldOut) {
+        return new Response(new Blob(), { status: 410, statusText: "Error. This ticket is no longer in stock" })
+    } else if (error) {
         return new Response(new Blob(), { status: 500, statusText: "Error finding user with id " + userId })
     } else if (registration) {
         return new Response(new Blob(), { status: 401, statusText: "User is already registered" })

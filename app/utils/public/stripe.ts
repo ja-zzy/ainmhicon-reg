@@ -6,11 +6,11 @@ if (!stripePublicKey) { throw new Error('Missing supabase environment variables,
 
 const stripePromise = loadStripe(stripePublicKey);
 
-export async function handleCheckout(userId: string, priceId: string) {
+export async function handleCheckout(userId: string, priceId: string, selectedDay: string) {
     const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId })
+        body: JSON.stringify({ priceId, userId, selectedDay })
     })
     if (res.status !== 200) { throw new Error(res.statusText) }
     const { sessionId } = await res.json();
