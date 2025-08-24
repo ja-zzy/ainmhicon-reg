@@ -8,7 +8,6 @@ const overrideUserId = process.env.OVERRIDE_USER_ID
 const cocLink = process.env.CODE_OF_CONDUCT_LINK
 
 export async function POST(req: Request) {
-    if (Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
     const { priceId, userId, selectedDay } = await req.json()
 
     if (userId !== overrideUserId && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
