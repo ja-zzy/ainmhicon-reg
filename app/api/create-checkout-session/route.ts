@@ -70,6 +70,7 @@ export async function POST(req: Request) {
                     message: `I agree to Ainmhícon's [Code of Conduct](${cocLink})`,
                 },
             },
+            expires_at: Math.floor(Date.now() / 1000) + 1820, // checkout session expires ~30 minutes after creation
         })
 
         return Response.json({ sessionId: session.id })
