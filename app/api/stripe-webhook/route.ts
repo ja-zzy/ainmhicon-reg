@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { NextResponse } from 'next/server';
-import { stripe, stripeWebhookSecret } from '@/app/utils/private/stripe';
+import { stripe, stripeWebhookSecret, updateTicketStock } from '@/app/utils/private/stripe';
 import { supabase } from '@/app/utils/private/supabase';
 
 export async function POST(req: Request) {
@@ -32,11 +32,12 @@ export async function POST(req: Request) {
 
             const lineItems = await stripe.checkout.sessions.listLineItems(event.data.object.id);
             const ticketType = lineItems.data[0]?.description || 'Unknown';
-
+            await updateTicketStock(ticketType);
+            
             const { error } = await supabase
-                .from('registrations')
-                .upsert({ user_id: userId, payment_status: 'paid', convention_id: 1, ticket_type: ticketType })
-
+            .from('registrations')
+            .upsert({ user_id: userId, payment_status: 'paid', convention_id: 1, ticket_type: ticketType })
+            
             if (error) {
                 console.error('Supabase error when updating paid status', error);
                 return new NextResponse('Error updating registration', { status: 500 });
@@ -44,5 +45,6 @@ export async function POST(req: Request) {
 
             break;
     }
+
     return new NextResponse('OK', { status: 200 })
 }
