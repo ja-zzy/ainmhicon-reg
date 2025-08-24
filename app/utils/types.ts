@@ -8,6 +8,7 @@ export type Attendee = {
     emergency_contact_name: string
     emergency_contact_phone: string
     medical_info: string
+    fursuit: string
 }
 
 export type Registration = {
