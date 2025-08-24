@@ -1,5 +1,5 @@
 "use client"
-import { ChangeEventHandler, FormEventHandler, InvalidEvent, useEffect, useState } from 'react'
+import { FormEventHandler, InvalidEvent, useEffect, useState } from 'react'
 import { supabase } from '../utils/public/supabase'
 import { Attendee } from '../utils/types'
 import ErrorMessage from '../components/errorMessage'
@@ -12,7 +12,7 @@ import Avatar from './avatar'
 export default function UserDetailsPage() {
     const [error, setError] = useState<string | null>()
     const { attendee, user, updateProfile } = useAuth()
-    const [tempAttendee, setTempAttendee] = useState<Attendee>(attendee || { first_name: '', last_name: '', phone: '', pronouns: '', dob: '', nickname: '', emergency_contact_name: '', emergency_contact_phone: '', medical_info: '' })
+    const [tempAttendee, setTempAttendee] = useState<Attendee>(attendee || { first_name: '', last_name: '', phone: '', pronouns: '', dob: '', nickname: '', emergency_contact_name: '', emergency_contact_phone: '', medical_info: '', fursuit: '' })
     const [userProfilePic, setUserProfilePic] = useState<'loading' | string | undefined>('loading')
     const [updatePending, setUpdatePending] = useState(false)
 
@@ -162,6 +162,20 @@ export default function UserDetailsPage() {
                     <input type="text" className="input mb-3" placeholder="Optional" value={tempAttendee?.pronouns || ''}
                         onChange={(e) => setTempAttendee({ ...tempAttendee, pronouns: e.target.value })}
                     />
+
+                    <label className='label mt-2'>Do you plan on bringing a fursuit to Ainmhícon?</label>
+                    <select className='input mb-3 select' name='fursuit' id='fursuit' value={tempAttendee?.fursuit}
+                        onChange={(e) => setTempAttendee({ ...tempAttendee, fursuit: e.target.value })}>
+                        <option value={"no"}>No</option>
+                        <option value={"partial"}>Yes - Partial Suit</option>
+                        <option value={"fullsuit"}>Yes - Full Suit</option>
+                    </select>
+                    {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === 'fullsuit') &&
+                        <div role='alert' className='alert alert-error alert-soft'>
+                            <span>Please be aware that we have limited storage space for fursuits!
+                                We highly suggest you do not bring your suit in a hardshell case, and opt for a soft shell or collapsible bag or suitcase instead</span>
+                        </div>
+                    }
 
                     <label className="label mt-2">Emergency Contact Name</label>
                     <input type="text" className="input mb-3" placeholder='Seán Gull' value={tempAttendee?.emergency_contact_name || ''}
