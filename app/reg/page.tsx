@@ -38,9 +38,10 @@ export default function RegPage() {
         return false
     }
 
+    const overrideTimer = new URL(window.location.href).searchParams.has('noTimer')
     // Redirect to dashboard if attendee info not complete
     useEffect(() => {
-        if (!attendee?.first_name || !attendee.last_name || !attendee.dob || Date.now() < regStartTime) {
+        if (!attendee?.first_name || !attendee.last_name || !attendee.dob || (!overrideTimer && Date.now() < regStartTime)) {
             router.push('/dashboard')
         }
     }, [attendee])

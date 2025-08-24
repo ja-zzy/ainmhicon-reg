@@ -3,10 +3,12 @@ import { stripe } from '@/app/utils/private/stripe';
 import { supabase } from '@/app/utils/private/supabase';
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
+const overrideUserId = process.env.OVERRIDE_USER_ID
 
 export async function POST(req: Request) {
-    if (Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
     const { priceId, userId } = await req.json()
+
+    if (userId !== overrideUserId && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
 
     // We shouldn't let a user pay again if they're already registered, that'd be complicated
     const { data: registration, error } = await supabase
