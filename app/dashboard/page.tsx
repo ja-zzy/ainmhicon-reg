@@ -50,6 +50,7 @@ export default function Dashboard() {
     const hours = duration.hours();
     const minutes = duration.minutes();
     const seconds = duration.seconds();
+    const overrideTimer = new URL(window.location.href).searchParams.has('noTimer')
 
     const sufficientDetailToPurchaseTicket = attendee.first_name && attendee.last_name && attendee.dob
     return (
@@ -80,7 +81,7 @@ export default function Dashboard() {
 
             {!registration && (
                 <>
-                    {time >= regStartTime ? (
+                    {overrideTimer || time >= regStartTime ? (
                         <>
                             {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
                             <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`} >Register for Ainmhícon 2026</Link>
