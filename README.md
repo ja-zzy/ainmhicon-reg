@@ -119,7 +119,89 @@ TODO: Jazzy
 
 ### Stripe
 
-TODO: Laghairt
+Stripe is our payment processor, and it contains a record of all our ticketing information and transactions.
+
+#### Account Setup
+
+To begin, you will need to set up a Stripe account: https://dashboard.stripe.com/. Best to make sure this is secured with 2FA and only accessible by those who need it, since a lot of personal and financial information for convention staff and attendees alike can be accessed here. 
+
+Create a Stripe account and fill in all the personal details it asks for. You don't have to add it immediately, but in order to actually receive payments a bank account needs to be connected to Stripe, preferably a business bank account. 
+
+For setting up and testing, ensure that the Stripe dashboard is in Sandbox Mode. Nothing made here will need actual payment information or take real money. When you are ready to deploy publicly, you should exit sandbox mode and remake/import everything over.
+
+#### Create Products
+
+Navigate to the Product Catalog page, and begin adding products. Ainmhícon 2026 has the following products:
+
+| Name | Pricing |
+|-|-|
+| 2026 Ticket Controller | €0.00 |
+| Ainmhícon 2026 - Founder Package | €270.00 |
+| Ainmhícon 2026 - Weekend Sponsor Ticket | €170 |
+| Ainmhícon 2026 - Day Pass Sunday Sponsor Ticket | €100 |
+| Ainmhícon 2026 - Day Pass Saturday Sponsor Ticket | €100 |
+| Ainmhícon 2026 - Weekend Standard Ticket | €90 |
+| Ainmhícon 2026 - Day Pass Sunday Standard Ticket | €60 |
+| Ainmhícon 2026 - Day Pass Saturday Standard Ticket | €60 |
+
+Note: The "2026 Ticket Controller" product is not actually sold, and exists only to contain metadata about ticket sales and venue capacity. This product contains the following metadata fields inside:
+
+- `tickets_sold_sat`
+- `tickets_sold_sun`
+- `venue_capacity_sat`
+- `venue_capacity_sun`
+
+Within the application we have logic so that each time a ticket purchase is made, one of the `tickets_sold` fields will increment (or both, if a weekend ticket is bought), users will not be brought to the checkout page if the `venue_capacity` has been reached. Stripe does not natively let you set stock/capacity limits, so this is used as a workaround.
+
+All of the actual ticket products contain the following metadata entries, with 3 possible values each:
+
+- day -> saturday / sunday / weekend
+- tier -> standard / sponsor / founder
+
+This makes it easy to query specific ticket types through their metadata, which lets us bring a user to checkout with the kind of ticket they want without much hassle.
+
+#### Coupons & Discounts
+
+On the Product catalogue page there is a tab named "Coupons". The project is currently configured to auto-apply the best discount to a user's purchase. This is why the ticket products are created with their late fee as the base price, Early Bird and Standard Fare are applied as discounts on top of the late fee price. Coupons can be configured as a flate rate discount or a percentage, we use a coupon expiry date to set when Early Bird closes.
+
+#### Project Keys
+
+These keys will need to be stored in your project for Stripe to function:
+
+- `NEXT_PUBLIC_STRIPE_PK`
+- `STRIPE_SK`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_CONTROL_PRODUCT_ID`
+
+__Do Not Forget:__  There are seperate keys for your Sandbox and your Live Stripe environment. Use the Sandbox ones for development and testing! If your secret keys get released publically you should always re-generate new ones immediately
+
+##### `NEXT_PUBLIC_STRIPE_PK` + `STRIPE_SK`
+
+On your Stripe dashboard, search for `Developers > API keys`. Here you will find your Publishable key and Secret key. Use these values for each key in your project respectively.
+
+##### `STRIPE_WEBHOOK_SECRET`
+
+1. On your Stripe dashboard, search for `Webhooks`.
+2. Create a new Webhook by clicking "Add destination". 
+3. Select all of the "Checkout" events:
+    - checkout.session.async_payment_failed
+    - checkout.session.async_payment_succeeded
+    - checkout.session.completed
+    - checkout.session.expired
+4. Press Continue
+5. Set Destination type as "Webhook endpoint"
+6. Set the Destination URL to the project's `stripe-webhook` API endpoint
+    - This would be `https://reg.ainmhicon.ie/api/stripe-webhook`
+7. Fill in any other optional information, and finish creating your endpoint
+8. Once created, you should be able to view the Signing secret. Use this as the value for `STRIPE_WEBHOOK_SECRET`
+
+##### `STRIPE_CONTROL_PRODUCT_ID`
+
+If you have created the "Ticket Controller" product mentioned above, set this value to the Product ID of that product
+
+#### Preparing Stripe for Live Deployment
+
+When you are ready to launch your registration publically, you must make sure you change the secret keys from the Sandbox values to the Live values. You will have to re-create or otherwise import all your products into the Live dashboard too. In order for you to be allowed to accept payments you will need a bank account linked to your Stripe account.
 
 ### Vercel 
 
