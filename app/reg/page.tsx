@@ -231,8 +231,9 @@ export default function RegPageForm() {
                                             setCurrentStep(STEPS.PAYMENT);
                                         }}
                                         className={`btn btn-neutral w-full ${tier === 'Sponsor' && 'btn-primary'}`}
+                                        disabled={true}
                                     >
-                                        Sponsor
+                                        Sponsor SOLD OUT
                                     </button>
                                     {day === 'Weekend' && (
                                         <button
@@ -241,8 +242,9 @@ export default function RegPageForm() {
                                                 setCurrentStep(STEPS.PAYMENT);
                                             }}
                                             className={`btn btn-neutral w-full ${tier === 'Founder' && 'btn-primary'}`}
+                                            disabled={true}
                                         >
-                                            Founder
+                                            Founder SOLD OUT
                                         </button>
                                     )}
                                 </div>
