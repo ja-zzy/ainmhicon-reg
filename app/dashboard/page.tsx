@@ -110,7 +110,7 @@ export default function Dashboard() {
     const regClosedComponent = (
         <>
             <h3 className='mt-[24px] text-lg'>Registration for Ainmhícon 2026 is now closed</h3>
-            <p>Sorry if you didn't get to join us this year. Keep an eye on our socials for announcements about  Ainmhícon 2027!</p>
+            <p>Sorry if you didn't get to join us this year. Keep an eye on our socials for announcements about Ainmhícon 2027!</p>
             <div className='flex justify-evenly mt-[16px]'>
                 <a href='https://bsky.app/profile/ainmhicon.ie'>
                     <Bluesky />
