@@ -104,7 +104,7 @@ export default function Dashboard() {
     )
     const startRegComponent = (<>
         {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
-        {(regEndTime - time <= (1000 * 60 * 60 * 24 * 9 /* 1 week */)) && regTimerEndComponent}
+        {(regEndTime - time <= (1000 * 60 * 60 * 24 * 7 /* 1 week */)) && regTimerEndComponent}
         <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2026</Link>
     </>)
     const regClosedComponent = (
