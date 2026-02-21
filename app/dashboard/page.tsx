@@ -3,8 +3,12 @@ import Link from 'next/link'
 import { useAuth } from '../context/authContext'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
+import Bluesky from './social-logos/bluesky'
+import Instagram from './social-logos/instagram'
+import Telegram from './social-logos/telegram'
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
+const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
 
 export default function Dashboard() {
     const { attendee, registration, logout } = useAuth()
@@ -45,14 +49,93 @@ export default function Dashboard() {
 
     if (!attendee) { return null }
 
-    const duration = moment.duration(regStartTime - time);
-    const days = Math.floor(duration.asDays());
-    const hours = duration.hours();
-    const minutes = duration.minutes();
-    const seconds = duration.seconds();
+    const timeUntilRegStart = moment.duration(regStartTime - time);
     const overrideTimer = new URL(window.location.href).searchParams.has('noTimer')
+    const timeUntilRegEnd = moment.duration(regEndTime - time)
 
     const sufficientDetailToPurchaseTicket = attendee.first_name && attendee.last_name && attendee.dob
+
+    const timeToCountDown = (targetTime: moment.Duration) => {
+        const days = Math.floor(targetTime.asDays());
+        const hours = targetTime.hours();
+        const minutes = targetTime.minutes();
+        const seconds = targetTime.seconds();
+        return (
+            <div className="grid grid-flow-col gap-5 text-center auto-cols-max m-auto my-[16px]">
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": days } as React.CSSProperties} aria-live="polite" aria-label={days.toString()}>{days}</span>
+                    </span>
+                    days
+                </div>
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": hours } as React.CSSProperties} aria-live="polite" aria-label={hours.toString()}>{hours}</span>
+                    </span>
+                    hours
+                </div>
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": minutes } as React.CSSProperties} aria-live="polite" aria-label={minutes.toString()}>{minutes}</span>
+                    </span>
+                    min
+                </div>
+                <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
+                    <span className="countdown font-mono text-2xl">
+                        <span style={{ "--value": seconds } as React.CSSProperties} aria-live="polite" aria-label={seconds.toString()}>{seconds}</span>
+                    </span>
+                    sec
+                </div>
+            </div>
+        )
+    }
+    const regTimerStartComponent = (
+        <>
+            <h3 className='mt-[16px] text-base text-center'>Reg Opens In</h3>
+            {timeToCountDown(timeUntilRegStart)}
+        </>
+    )
+
+    const regTimerEndComponent = (
+        <>
+            <h3 className='mt-[16px] text-base text-center'>Reg Closes In</h3>
+            {timeToCountDown(timeUntilRegEnd)}
+        </>
+    )
+    const startRegComponent = (<>
+        {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
+        {(regEndTime - time <= (1000 * 60 * 60 * 24 * 9 /* 1 week */)) && regTimerEndComponent}
+        <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2026</Link>
+    </>)
+    const regClosedComponent = (
+        <>
+            <h3 className='mt-[24px] text-lg'>Registration for Ainmhícon 2026 is now closed</h3>
+            <p>Sorry if you didn't get to join us this year. Keep an eye on our socials for announcements about  Ainmhícon 2027!</p>
+            <div className='flex justify-evenly mt-[16px]'>
+                <a href='https://bsky.app/profile/ainmhicon.ie'>
+                    <Bluesky />
+                </a>
+                <a href='https://www.instagram.com/ainmhicon'>
+                    <Instagram />
+                </a>
+                <a href='https://t.me/ainmhicon'>
+                    <Telegram />
+                </a>
+            </div>
+        </>
+    )
+
+    let regFlowStart;
+    if (!registration) {
+        if (time > regEndTime) {
+            regFlowStart = regClosedComponent
+        } else if (overrideTimer || time >= regStartTime) {
+            regFlowStart = startRegComponent
+        } else {
+            regFlowStart = regTimerStartComponent
+        }
+    }
+
     return (
         <>
             <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
@@ -79,46 +162,7 @@ export default function Dashboard() {
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
 
-            {!registration && (
-                <>
-                    {overrideTimer || time >= regStartTime ? (
-                        <>
-                            {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
-                            <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`} >Register for Ainmhícon 2026</Link>
-                        </>
-                    )
-                        : (
-                            <>
-                                <h3 className='mt-[8px]'>Reg Opens In</h3>
-                                <div className="grid grid-flow-col gap-5 text-center auto-cols-max m-auto my-[16px]">
-                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                                        <span className="countdown font-mono text-2xl">
-                                            <span style={{ "--value": days } as React.CSSProperties} aria-live="polite" aria-label={days.toString()}>{days}</span>
-                                        </span>
-                                        days
-                                    </div>
-                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                                        <span className="countdown font-mono text-2xl">
-                                            <span style={{ "--value": hours } as React.CSSProperties} aria-live="polite" aria-label={hours.toString()}>{hours}</span>
-                                        </span>
-                                        hours
-                                    </div>
-                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                                        <span className="countdown font-mono text-2xl">
-                                            <span style={{ "--value": minutes } as React.CSSProperties} aria-live="polite" aria-label={minutes.toString()}>{minutes}</span>
-                                        </span>
-                                        min
-                                    </div>
-                                    <div className="flex flex-col items-center p-2 bg-neutral rounded-box text-neutral-content">
-                                        <span className="countdown font-mono text-2xl">
-                                            <span style={{ "--value": seconds } as React.CSSProperties} aria-live="polite" aria-label={seconds.toString()}>{seconds}</span>
-                                        </span>
-                                        sec
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                </>)}
+            {regFlowStart}
             <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full ">Logout</button>
         </>)
 }

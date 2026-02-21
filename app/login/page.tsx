@@ -39,8 +39,8 @@ export default function LoginPage() {
                     <button type="submit" className="btn btn-neutral mt-4 w-full" disabled={loading}>{loading && <span className="loading loading-ring loading-md"></span>}{!loading && <>Send Magic Link</>}</button>
                 </form>
             </div>
-            <div id={checkEmailId} className="carousel-item relative w-full">
-                <p>Thanks, we've sent you an email. Please check your inbox and spam box!</p>
+            <div id={checkEmailId} className="carousel-item relative w-full" style={{ wordBreak: 'break-word' }}>
+                <p>Thanks, we've sent an email to <b>{email}</b>. If you don't receive it within the next few minutes, please check your spam box and ensure the email entered was correct!</p>
             </div>
         </div>
     )

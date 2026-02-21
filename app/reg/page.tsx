@@ -9,6 +9,7 @@ import { getSelectedProduct, handleCheckout } from "../utils/public/stripe";
 import { useAuth } from "../context/authContext";
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
+const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
 
 type AttendanceDay = 'Saturday' | 'Sunday' | 'Weekend'
 type Tier = 'Standard' | 'Sponsor' | 'Founder'
@@ -80,7 +81,7 @@ export default function RegPageForm() {
     const overrideTimer = new URL(window.location.href).searchParams.has('noTimer')
     // Redirect to dashboard if attendee info not complete
     useEffect(() => {
-        if (!attendee?.first_name || !attendee.last_name || !attendee.dob || (!overrideTimer && Date.now() < regStartTime)) {
+        if (!attendee?.first_name || !attendee.last_name || !attendee.dob || (!overrideTimer && Date.now() < regStartTime) || Date.now() > regEndTime) {
             router.push('/dashboard')
         }
     }, [attendee])
