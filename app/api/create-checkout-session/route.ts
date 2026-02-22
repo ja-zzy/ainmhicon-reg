@@ -4,6 +4,7 @@ import { supabase } from '@/app/utils/private/supabase';
 import { getTicketStock } from '@/app/utils/public/stripe';
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
+const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
 const overrideUserId = process.env.OVERRIDE_USER_ID
 const cocLink = process.env.CODE_OF_CONDUCT_LINK
 
@@ -11,6 +12,7 @@ export async function POST(req: Request) {
     const { priceId, userId, selectedDay } = await req.json()
 
     if (userId !== overrideUserId && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
+    if (Date.now() > regEndTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is now closed" }) }
 
     // We shouldn't let a user pay again if they're already registered, that'd be complicated
     const { data: registration, error } = await supabase
