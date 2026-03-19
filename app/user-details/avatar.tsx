@@ -11,6 +11,7 @@ interface AvatarUploaderProps {
 
 export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploaderProps) {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [imageType, setImageType] = useState<string | null>(null);
     const [cropping, setCropping] = useState(false);
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
@@ -20,6 +21,7 @@ export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploade
         const file = e.target.files?.[0];
         if (file) {
             setImageSrc(URL.createObjectURL(file));
+            setImageType(file.type)
             setCropping(true);
         }
     };
@@ -29,10 +31,10 @@ export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploade
     };
 
     const finishCropping = async () => {
-        if (!imageSrc || !croppedAreaPixels) return;
+        if (!imageSrc || !croppedAreaPixels || !imageType) return;
 
         try {
-            const croppedBlob = await getCroppedImage(imageSrc, croppedAreaPixels);
+            const croppedBlob = await getCroppedImage(imageSrc, croppedAreaPixels, imageType);
             onImageChanged(croppedBlob);
         } catch (err) {
             console.error('Cropping failed', err);
