@@ -9,14 +9,28 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
         image.onerror = (err) => reject(err);
     });
 
-export const getCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Blob> => {
+export const getCroppedImage = async (
+    imageSrc: string,
+    pixelCrop: Area,
+    imageType: string
+): Promise<Blob> => {
     const image = await createImage(imageSrc);
     const canvas = document.createElement('canvas');
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
     const ctx = canvas.getContext('2d');
 
     if (!ctx) throw new Error('Failed to get 2D context');
+
+    const scale = Math.min(
+        1000 / pixelCrop.width,
+        1000 / pixelCrop.height,
+        1
+    );
+
+    const outputWidth = pixelCrop.width * scale;
+    const outputHeight = pixelCrop.height * scale;
+
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
 
     ctx.drawImage(
         image,
@@ -26,14 +40,14 @@ export const getCroppedImage = async (imageSrc: string, pixelCrop: Area): Promis
         pixelCrop.height,
         0,
         0,
-        pixelCrop.width,
-        pixelCrop.height
+        outputWidth,
+        outputHeight
     );
 
     return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((blob) => {
             if (blob) resolve(blob);
             else reject(new Error('Canvas is empty'));
-        }, 'image/jpeg');
+        }, imageType === 'image/png' ? 'image/png' : 'image/jpeg', 90);
     });
 };
