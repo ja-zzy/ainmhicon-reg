@@ -6,12 +6,22 @@ import moment from 'moment'
 import Bluesky from './social-logos/bluesky'
 import Instagram from './social-logos/instagram'
 import Telegram from './social-logos/telegram'
-
-const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
-const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
+import { Attendee, Registration } from '../utils/types'
 
 export default function Dashboard() {
-    const { attendee, registration, logout } = useAuth()
+    const authProps = useAuth()
+    return <DashboardView {...authProps} regStartTime={Number(process.env.NEXT_PUBLIC_REG_START_TIME)} regEndTime={Number(process.env.NEXT_PUBLIC_REG_END_TIME)} />
+}
+
+interface DashboardViewProps {
+    attendee: Attendee | null
+    registration: Registration | null
+    logout: () => void
+    regStartTime: number
+    regEndTime: number
+}
+
+export function DashboardView({ attendee, registration, logout, regStartTime, regEndTime }: DashboardViewProps) {
     const [time, setTime] = useState(Date.now());
     const [showCancelled, setShowCancelled] = useState(false);
     useEffect(() => {

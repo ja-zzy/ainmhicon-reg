@@ -7,9 +7,10 @@ import Loading from '../components/loading';
 interface AvatarUploaderProps {
     userProfilePic: 'loading' | string | undefined;
     onImageChanged: (croppedBlob: Blob) => void;
+    updatesDisabled?: boolean
 }
 
-export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploaderProps) {
+export default function Avatar({ userProfilePic, onImageChanged, updatesDisabled }: AvatarUploaderProps) {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [imageType, setImageType] = useState<string | null>(null);
     const [cropping, setCropping] = useState(false);
@@ -35,6 +36,7 @@ export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploade
 
         try {
             const croppedBlob = await getCroppedImage(imageSrc, croppedAreaPixels, imageType);
+            console.log(URL.createObjectURL(croppedBlob))
             onImageChanged(croppedBlob);
         } catch (err) {
             console.error('Cropping failed', err);
@@ -51,13 +53,16 @@ export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploade
             >
                 <label
                     htmlFor={cropping ? undefined : 'profile-picture'}
-                    className={`w-[140px] h-[140px]  rounded-full m-auto cursor-pointer relative group overflow-hidden text-black ${userProfilePic === 'loading' || !userProfilePic ? 'bg-base-100' : ''}`}
+                    className={`w-[140px] h-[140px]  rounded-full m-auto ${!updatesDisabled && 'cursor-pointer'} relative group overflow-hidden text-black ${userProfilePic === 'loading' || !userProfilePic ? 'bg-base-100' : ''}`}
                 >
                     {/* Image states */}
-                    {userProfilePic === 'loading' && <Loading />}
-                    {!userProfilePic && <div className="text-l w-[140px] h-[140px] flex justify-center items-center text-center">No Badge!</div>}
-                    {userProfilePic && userProfilePic !== 'loading' && (
-                        <img src={userProfilePic} className="aspect-square w-full h-full object-cover" />
+                    {!cropping && (<>
+                        {userProfilePic === 'loading' && <Loading />}
+                        {!userProfilePic && <div className="text-l w-[140px] h-[140px] flex justify-center items-center text-center">No Badge!</div>}
+                        {userProfilePic && userProfilePic !== 'loading' && (
+                            <img src={userProfilePic} className="aspect-square w-full h-full object-cover" />
+                        )}
+                    </>
                     )}
 
                     {/* Cropper overlay */}
@@ -71,14 +76,21 @@ export default function Avatar({ userProfilePic, onImageChanged }: AvatarUploade
                                 onCropChange={setCrop}
                                 onZoomChange={setZoom}
                                 onCropComplete={handleCropComplete}
+                                objectFit='cover'
+                                cropShape='round'
+                                showGrid={true}
+                                zoomWithScroll={true}
+                                classes={{ mediaClassName: 'overflow-visible' }}
                             />
                         </div>
                     )}
 
                     {/* Hover effect */}
-                    <div className="absolute top-[100%] w-full h-full text-center bg-neutral/30 transition-all duration-150 ease-out backdrop-blur-xs text-white flex items-center justify-center group-hover:top-0">
-                        <i className="">Change<br />Picture</i>
-                    </div>
+                    {!updatesDisabled && !cropping && (
+                        <div className="absolute top-[100%] w-full h-full text-center bg-neutral/30 transition-all duration-150 ease-out backdrop-blur-xs text-white flex items-center justify-center group-hover:top-0">
+                            <i className="">Change<br />Picture</i>
+                        </div>
+                    )}
                 </label>
 
                 <input

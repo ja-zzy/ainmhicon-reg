@@ -8,15 +8,34 @@ import { useAuth } from '../context/authContext'
 import { AuthWrapper } from '../components/authWrapper'
 import Loading from '../components/loading'
 import Avatar from './avatar'
+import { User } from '@supabase/supabase-js'
 
 export default function UserDetailsPage() {
+    const authProps = useAuth()
+
+    const router = useRouter()
+    const redirect = () => router.push('/dashboard')
+
+    return (
+        <AuthWrapper requireAuth={true} allowIncompleteProfile={true}>
+            <UserDetailsView {...authProps} onRedirect={redirect} updatesDisabled={true} />
+        </AuthWrapper >
+    )
+}
+
+interface UserDetailsViewProps {
+    attendee: Attendee | null
+    user: User | null
+    updateProfile: (updates: Partial<Attendee>) => Promise<void>
+    onRedirect: () => void
+    updatesDisabled?: boolean
+}
+
+export function UserDetailsView({ attendee, user, updateProfile, onRedirect, updatesDisabled }: UserDetailsViewProps) {
     const [error, setError] = useState<string | null>()
-    const { attendee, user, updateProfile } = useAuth()
     const [tempAttendee, setTempAttendee] = useState<Attendee>(attendee || { first_name: '', last_name: '', phone: '', pronouns: '', dob: '', nickname: '', emergency_contact_name: '', emergency_contact_phone: '', medical_info: '', fursuit: '' })
     const [userProfilePic, setUserProfilePic] = useState<'loading' | string | undefined>('loading')
     const [updatePending, setUpdatePending] = useState(false)
-
-    const router = useRouter()
     useEffect(() => {
         if (attendee) {
             setTempAttendee(attendee)
@@ -43,7 +62,7 @@ export default function UserDetailsPage() {
         setError(null)
         setUpdatePending(true)
         updateProfile(tempAttendee)
-            .then(() => router.push('/dashboard'))
+            .then(onRedirect)
             .catch((e) => setError(e.message))
     }
 
@@ -74,7 +93,7 @@ export default function UserDetailsPage() {
     }
 
     function navigateBack() {
-        router.push('/dashboard')
+        onRedirect()
     }
 
     const handleInvalidLegalNameField = (event: InvalidEvent<HTMLInputElement>) => {
@@ -118,87 +137,91 @@ export default function UserDetailsPage() {
 
         return `${year}-${month}-${day}`;
     };
-
     return (
-        <AuthWrapper requireAuth={true} allowIncompleteProfile={true}>
+        <>
             {updatePending && <Loading />}
             {!updatePending && (
-                <form onSubmit={handleUpdate} className='p-2'>
+                <div className='p-2'>
+                    <fieldset disabled={updatesDisabled}>
+                        <form onSubmit={handleUpdate} >
+                            <h2 className='font-[family-name:var(--font-sora)] text-xl mb-3'>Your Details</h2>
+                            {updatesDisabled && (<label className='block mb-4'>Changes to registration details are now closed! If there are details which need urgently updating please contact <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></label>)}
 
-                    <h2 className='font-[family-name:var(--font-sora)] text-xl mb-3'>Your Details</h2>
-                    <Avatar userProfilePic={userProfilePic} onImageChanged={imageChangeHandler} />
-                    <div className="divider">Legal Information</div>
-                    <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/#faq' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
-                    <br />
-                    <label className="label mt-2">First Name</label>
-                    <input type="text" className="input" placeholder="Ceol" value={tempAttendee?.first_name || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, first_name: e.target.value })}
-                        onInput={handleInput}
-                        onInvalid={handleInvalidLegalNameField}
-                        required />
-                    <label className="label mt-2">Last Name</label>
-                    <input type="text" className="input" placeholder="Púcas" value={tempAttendee?.last_name || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, last_name: e.target.value })}
-                        onInput={handleInput}
-                        onInvalid={handleInvalidLegalNameField}
-                        required />
-                    <label className="label mt-2" >Date of Birth</label>
-                    <input type="date" className="input" value={tempAttendee?.dob ? formatDate(new Date(tempAttendee.dob)) : ''} required onChange={(e) => setTempAttendee({ ...tempAttendee, dob: new Date(e.target.value).toISOString() })}
-                        onInput={handleInput}
-                        onInvalid={handleInvalidDobField}
-                    ></input>
-                    <div className="divider">Additional Information</div>
-                    <label className="label">Nickname &#40;Displayed on your badge&#41;</label>
-                    <input type="text" className="input" placeholder="Fuzzball" value={tempAttendee?.nickname || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, nickname: e.target.value })}
-                        required />
-                    <label className="label mt-2">Phone Number</label>
-                    <input type="tel" className="input" placeholder="089 011 0123" value={tempAttendee?.phone || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, phone: e.target.value })}
-                        onInput={handleInput}
-                        onInvalid={handleInvalidPhoneField}
-                        required />
-                    <label className="label mt-2">Pronouns</label>
-                    <input type="text" className="input mb-3" placeholder="Optional" value={tempAttendee?.pronouns || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, pronouns: e.target.value })}
-                    />
+                            <Avatar userProfilePic={userProfilePic} onImageChanged={imageChangeHandler} updatesDisabled={updatesDisabled} />
+                            <div className="divider">Legal Information</div>
+                            <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/#faq' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
+                            <br />
+                            <label className="label mt-2">First Name</label>
+                            <input type="text" className="input" placeholder="Ceol" value={tempAttendee?.first_name || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, first_name: e.target.value })}
+                                onInput={handleInput}
+                                onInvalid={handleInvalidLegalNameField}
+                                required />
+                            <label className="label mt-2">Last Name</label>
+                            <input type="text" className="input" placeholder="Púcas" value={tempAttendee?.last_name || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, last_name: e.target.value })}
+                                onInput={handleInput}
+                                onInvalid={handleInvalidLegalNameField}
+                                required />
+                            <label className="label mt-2" >Date of Birth</label>
+                            <input type="date" className="input" value={tempAttendee?.dob ? formatDate(new Date(tempAttendee.dob)) : ''} required onChange={(e) => setTempAttendee({ ...tempAttendee, dob: new Date(e.target.value).toISOString() })}
+                                onInput={handleInput}
+                                onInvalid={handleInvalidDobField}
+                            ></input>
+                            <div className="divider">Additional Information</div>
+                            <label className="label">Nickname &#40;Displayed on your badge&#41;</label>
+                            <input type="text" className="input" placeholder="Fuzzball" value={tempAttendee?.nickname || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, nickname: e.target.value })}
+                                required />
+                            <label className="label mt-2">Phone Number</label>
+                            <input type="tel" className="input" placeholder="089 011 0123" value={tempAttendee?.phone || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, phone: e.target.value })}
+                                onInput={handleInput}
+                                onInvalid={handleInvalidPhoneField}
+                                required />
+                            <label className="label mt-2">Pronouns</label>
+                            <input type="text" className="input mb-3" placeholder="Optional" value={tempAttendee?.pronouns || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, pronouns: e.target.value })}
+                            />
 
-                    <label className='label mt-2'>Do you plan on bringing a fursuit to Ainmhícon?</label>
-                    <select className='input mb-3 select' name='fursuit' id='fursuit' value={tempAttendee?.fursuit}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, fursuit: e.target.value })}>
-                        <option value={"no"}>No</option>
-                        <option value={"partial"}>Yes - Partial Suit</option>
-                        <option value={"fullsuit"}>Yes - Full Suit</option>
-                    </select>
-                    {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === 'fullsuit') &&
-                        <div role='alert' className='alert alert-error alert-soft'>
-                            <span>Please be aware that we have limited storage space for fursuits!
-                                We highly suggest you do not bring your suit in a hardshell case, and opt for a soft shell or collapsible bag or suitcase instead</span>
-                        </div>
-                    }
+                            <label className='label mt-2'>Do you plan on bringing a fursuit to Ainmhícon?</label>
+                            <select className='input mb-3 select' name='fursuit' id='fursuit' value={tempAttendee?.fursuit}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, fursuit: e.target.value })}>
+                                <option value={"no"}>No</option>
+                                <option value={"partial"}>Yes - Partial Suit</option>
+                                <option value={"fullsuit"}>Yes - Full Suit</option>
+                            </select>
+                            {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === 'fullsuit') &&
+                                <div role='alert' className='alert alert-error alert-soft'>
+                                    <span>Please be aware that we have limited storage space for fursuits!
+                                        We highly suggest you do not bring your suit in a hardshell case, and opt for a soft shell or collapsible bag or suitcase instead</span>
+                                </div>
+                            }
 
-                    <label className="label mt-2">Emergency Contact Name</label>
-                    <input type="text" className="input mb-3" placeholder='Seán Gull' value={tempAttendee?.emergency_contact_name || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_name: e.target.value })}
-                    />
+                            <label className="label mt-2">Emergency Contact Name</label>
+                            <input type="text" className="input mb-3" placeholder='Seán Gull' value={tempAttendee?.emergency_contact_name || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_name: e.target.value })}
+                            />
 
-                    <label className='label mt-2'>Emergency Contact Number</label>
-                    <input type='text' className='input mb-3' placeholder='085 987 65432' value={tempAttendee?.emergency_contact_phone || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_phone: e.target.value })}
-                    />
+                            <label className='label mt-2'>Emergency Contact Number</label>
+                            <input type='text' className='input mb-3' placeholder='085 987 65432' value={tempAttendee?.emergency_contact_phone || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_phone: e.target.value })}
+                            />
 
-                    <label className="label mt-2 ">Accessibility Information and Medical Details</label>
-                    <textarea className="input min-h-[90px] rounded-xl p-[10px] whitespace-normal" placeholder='Let us know about any extra requirements we might be able to help with'
-                        value={tempAttendee?.medical_info || ''}
-                        onChange={(e) => setTempAttendee({ ...tempAttendee, medical_info: e.target.value })}>
-                    </textarea>
+                            <label className="label mt-2 ">Accessibility Information and Medical Details</label>
+                            <textarea className="input min-h-[90px] rounded-xl p-[10px] whitespace-normal" placeholder='Let us know about any extra requirements we might be able to help with'
+                                value={tempAttendee?.medical_info || ''}
+                                onChange={(e) => setTempAttendee({ ...tempAttendee, medical_info: e.target.value })}>
+                            </textarea>
 
-                    <ErrorMessage error={error} />
-                    <button type="submit" className="btn btn-neutral mt-4 w-full">Update</button>
-                    <button type="button" onClick={navigateBack} className="btn btn-neutral mt-4 w-full">Cancel</button>
-                </form>
+                            <ErrorMessage error={error} />
+                            <button type="submit" className="btn btn-neutral mt-4 w-full">Update</button>
+                        </form>
+                    </fieldset>
+                    <button type="button" onClick={navigateBack} className="btn btn-neutral w-full mt-3">Cancel</button>
+                </div>
             )
             }
-        </AuthWrapper >
+        </>
     )
 }
