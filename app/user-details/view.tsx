@@ -128,7 +128,7 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                     <fieldset disabled={updatesDisabled}>
                         <form onSubmit={handleUpdate} >
                             <h2 className='font-[family-name:var(--font-sora)] text-xl mb-3'>Your Details</h2>
-                            {updatesDisabled && (<label className='block mb-4'>Changes to registration details are now closed! If there are details which need urgently updating please contact <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></label>)}
+                            {updatesDisabled && (<label className='block mb-4'>Changes to registration details are now closed! If there are details which need urgently updating please contact <a href='mailto:reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></label>)}
 
                             <Avatar userProfilePic={userProfilePic} onImageChanged={imageChangeHandler} updatesDisabled={updatesDisabled} />
                             <div className="divider">Legal Information</div>
