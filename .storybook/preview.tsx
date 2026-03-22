@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/nextjs-vite'
-import { AppLayout } from '../app/layout'
+import { AppLayout } from '../app/app-layout'
 
 const preview: Preview = {
   decorators: [
