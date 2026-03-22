@@ -34,7 +34,7 @@ export function AppLayout({
   ) : children
   const content = (
     <div
-      className={`${interSans.variable} ${soraSans.variable} antialiased`}
+      className={`${interSans.variable} ${soraSans.variable} antialiased`} data-theme="ainmhicon"
     >
       <div className="flex h-[100%] flex-col items-center justify-contet-space-between min-h-screen p-8 pt-0 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-inter)]">
         <main className="flex flex-col flex-grow gap-[32px] items-center sm:items-start">
@@ -54,7 +54,7 @@ export function AppLayout({
           Ainmhícon, Company Limited by Guarantee, Company No. 793565
         </footer>
       </div>
-    </div>
+    </div >
   )
 
   return withAuth ? <AuthProvider>{content}</AuthProvider> : content
@@ -66,7 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="ainmhicon">
+    <html lang="en">
       <body>
         <AppLayout>{children}</AppLayout>
       </body>

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import { DashboardView } from '../app/dashboard/page'
+import { DashboardView } from '../app/dashboard/view'
 import { defaultMockAttendee, defaultMockUser, defaultRegistration } from './mocks/mock-types';
 
 const meta = {
