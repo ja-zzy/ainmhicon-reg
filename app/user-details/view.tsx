@@ -2,7 +2,7 @@ import { User } from "@supabase/supabase-js"
 import { useState, useEffect, FormEventHandler, InvalidEvent } from "react"
 import ErrorMessage from "../components/errorMessage"
 import Loading from "../components/loading"
-import { supabase } from "../utils/private/supabase"
+import { supabase } from "../utils/public/supabase"
 import { Attendee } from "../utils/types"
 import Avatar from "./avatar"
 
