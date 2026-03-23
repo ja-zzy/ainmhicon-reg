@@ -4,7 +4,6 @@
 
 The Ainmhícon Registration System is a fully open sourced system for registering guests for an event. It was originally designed for [Ainmhícon](https://ainmhicon.ie/), a furry convention in Dublin, Ireland. Anyone and everyone is welcome to adapt this project for their own event, convention or meetup, and the system is MIT Licensed with no strings attached. All we'd ask is that if you're able to do so, give [Ainmhícon](https://ainmhicon.ie/) a shout out on your event's website, or via your social media channels!
 
-
 Since this was built for the first year of Ainmhícon's existance and budget was limited, the entire service is designed to be possible to run for free! We're using highly scalable services with free tiers - so you can get this set up for as little as $0.
 
 Before you decide to implement our reg system, you may want to check it out here https://reg.ainmhicon.ie/ and decide if it meets your needs. We plan to expand functionality in future but currently support:
@@ -18,6 +17,9 @@ While we plan to add these features in future, we currently do not support:
 1. Booking/assigning convention hotel rooms
 2. Automated cancellations
 
+## Want help getting set up? 
+We'd be happy to help out. Please feel free to open an [issue](https://github.com/ja-zzy/ainmhicon-reg/issues) with the _Help Wanted_ label, and we'll get in touch!
+
 ## Key Components
 We'll be running through how to set up each of these components shortly, but to give a brief overview the system is built with
 
@@ -27,17 +29,29 @@ We'll be running through how to set up each of these components shortly, but to 
 * [Stripe](stripe.com) for sales and payment processing
 * [AWS SES](https://docs.aws.amazon.com/ses/latest/dg/Welcome.html) for sending login emails
 
-Importantly, Vercel and Supabase both offer free tiers, while being able to scale up massively. So you can relax when ticket sales go live, and feel confident that people aren't going to hug your registration system to death! 
+Importantly, Vercel and Supabase both offer free tiers, while being able to scale up massively. 
 
 ## Setup Guide
 
-This guide may look intimidatingly long, but it is all quite straightfoward. It should hopefully take you no more than 2 hours to get everything up and running. Without further ado
-
-The first thing you'll likely want to do is fork this repo and then clone that fork to your development machine. Do that now!
+The first thing you'll likely want to do is fork this repo and then clone that fork to your development machine. 
 
 #### Note on Environment Variables
 
-We have a lot of keys that need to be set in this project for Supabase and Stripe. We'll be setting these up in Vercel later. Keys that are safe for users to see are prefixed with `NEXT_PUBLIC_`.
+Almost all of the configuration for the project is handled via environment variables. Keys that are safe for users to see are prefixed with `NEXT_PUBLIC_`.
+
+| Variable | Function |
+|-|-|
+| NEXT_PUBLIC_SUPABASE_URL | The URL of your Supabase project |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | The public key required to call clientside Supabase functions |
+| NEXT_PUBLIC_STRIPE_PK | The public key required to call clientside Stripe functions |
+| NEXT_PUBLIC_REG_START_TIME | The time your convention's registration opens (Unix Timestamp in milliseconds) |
+| NEXT_PUBLIC_REG_END_TIME | The time your convention's registration closes (Unix Timestamp in milliseconds) |
+| SUPABASE_SERVICE_ROLE_KEY | The secret key for serverside Supabase functions |
+| STRIPE_SK | The secret key for serverside Stripe functions |
+| STRIPE_WEBHOOK_SECRET | The secret key for serverside Stripe Webhooks |
+| STRIPE_CONTROL_PRODUCT_ID | The product ID for a controller product that manages remaining ticket stock |
+| CODE_OF_CONDUCT_LINK | A URL to your convention's code of conduct |
+
 
 When developing locally, we'll set these keys using a file in the root of the project called `.env.local`. If you're following along, create this file now. Inside that file, copy and paste the following:
 ```
@@ -45,6 +59,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_STRIPE_PK=
 NEXT_PUBLIC_REG_START_TIME=
+NEXT_PUBLIC_REG_END_TIME=
 SUPABASE_SERVICE_ROLE_KEY=
 STRIPE_SK=
 STRIPE_WEBHOOK_SECRET=
@@ -65,7 +80,7 @@ Once installed, you can start the project by opening a terminal/command prompt i
 npm run dev
 ```
 
-You should then be able to navigate to http://localhost:3000 to see the System running. You'll likely be greeted by a bunch of errors at this point, because we need to setup Supabase. Lets do that now.
+You should then be able to navigate to http://localhost:3000 to see the System running. You'll likely be greeted by a bunch of errors at this point, because we need to setup Supabase, which we'll do in the next step.
 
 ### Supabase
 
@@ -92,7 +107,7 @@ At this point if you navigate back to http://localhost:3000  you should be able 
 <p align='center'style='width:100%'><img style="width:800px;" src="readme_stuff/home.png"><br/><i>Hopefully you'll now see something like this</i></p>
 
 #### Authentication
-The next step is to allow our users to sign in. In our version of this project we've elected to just allow [passwordless email login](https://supabase.com/docs/guides/auth/auth-email-passwordless) and that's what we'll set up here. There's nothing stopping you from providing other login options in your solution though!
+The next step is to allow our users to sign in. In our version of this project we've elected to just allow [passwordless email login](https://supabase.com/docs/guides/auth/auth-email-passwordless) and that's what we'll set up here. There's nothing stopping you from providing other login options in your solution though.
 
 1. In Project Settings under the Configuration heading click Authentication
 2. In the Supabase Auth tab make sure Allow new users to sign up is checked.
@@ -115,7 +130,7 @@ If you return to http://localhost:3000 and refresh you should see the user regis
 
 ### AWS SES
 
-TODO: Jazzy
+During development you can use the built in Supabase SMTP system, however when your convention goes live you'll need to use your own solution. We use AWS SES for our convention which is low cost and very scalable. There are docs on how to set up AWS SES [here](https://docs.aws.amazon.com/ses/latest/dg/setting-up.html) and the docs on how to set up Custom SMTP for Supabase auth are available [here](https://supabase.com/docs/guides/auth/auth-smtp)
 
 ### Stripe
 
@@ -123,9 +138,7 @@ Stripe is our payment processor, and it contains a record of all our ticketing i
 
 #### Account Setup
 
-To begin, you will need to set up a Stripe account: https://dashboard.stripe.com/. Best to make sure this is secured with 2FA and only accessible by those who need it, since a lot of personal and financial information for convention staff and attendees alike can be accessed here. 
-
-Create a Stripe account and fill in all the personal details it asks for. You don't have to add it immediately, but in order to actually receive payments a bank account needs to be connected to Stripe, preferably a business bank account. 
+To begin, you will need to set up a Stripe account: https://dashboard.stripe.com/.
 
 For setting up and testing, ensure that the Stripe dashboard is in Sandbox Mode. Nothing made here will need actual payment information or take real money. When you are ready to deploy publicly, you should exit sandbox mode and remake/import everything over.
 
@@ -205,11 +218,6 @@ When you are ready to launch your registration publically, you must make sure yo
 
 ### Vercel 
 
-TODO: Jazzy
+If you want to deploy to vercel, the easiest thing to do would likely be to fork the repo and set up a new project pointing at that fork from the [Vercel dashboard](https://vercel.com/). Click Add New -> Project and, once your Github account is linked, select your forked repo. Once that is done you should be able to go to the project's settings and set the Environment Variables that you have in your `.env.local` file. Once this is complete, simply merging to main will deploy the latest version of your site. 
 
-
-
-
-
-
-
+To use a custom url with Vercel e.g. `reg.yourconvetion.com`, check out the [vercel docs](https://vercel.com/docs/domains/working-with-domains/add-a-domain)
