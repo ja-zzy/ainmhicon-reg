@@ -34,3 +34,11 @@ export const WithUpdatesDisabled: Story = {
     }
 };
 
+export const WithUserBelowMinimumAge: Story = {
+    args: {
+        attendee: { ...defaultMockAttendee, dob: new Date().toISOString() },
+        user: defaultMockUser,
+        onRedirect: () => { },
+        updateProfile: (_) => Promise.resolve(),
+    }
+};

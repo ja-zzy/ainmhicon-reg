@@ -5,6 +5,8 @@ import Link from "next/link";
 import Bluesky from "./social-logos/bluesky";
 import Instagram from "./social-logos/instagram";
 import Telegram from "./social-logos/telegram";
+import { verifyAge } from "../utils/age-verification";
+const minimumConventionAge = Number(process.env.NEXT_PUBLIC_CON_MIN_AGE)
 
 interface DashboardViewProps {
     attendee: Attendee | null
@@ -17,6 +19,7 @@ interface DashboardViewProps {
 export function DashboardView({ attendee, registration, logout, regStartTime, regEndTime }: DashboardViewProps) {
     const [time, setTime] = useState(Date.now());
     const [showCancelled, setShowCancelled] = useState(false);
+    const [showAgeError, setShowAgeError] = useState(false)
     useEffect(() => {
         const interval = setInterval(() => setTime(Date.now()), 1000);
         return () => {
@@ -132,10 +135,16 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
     if (!registration) {
         if (time > regEndTime) {
             regFlowStart = regClosedComponent
-        } else if (overrideTimer || time >= regStartTime) {
-            regFlowStart = startRegComponent
-        } else {
-            regFlowStart = regTimerStartComponent
+        } else if (!showAgeError) {
+            if (attendee && !verifyAge(new Date(attendee.dob))) {
+                setShowAgeError(true)
+            }
+            if (overrideTimer || time >= regStartTime) {
+                regFlowStart = startRegComponent
+
+            } else {
+                regFlowStart = regTimerStartComponent
+            }
         }
     }
 
@@ -160,12 +169,13 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
                 <p className='text-center font-bold'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
                 <p className='my-[8px]'>Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>
             </>}
-            {registration && <p className='my=[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
+            {registration && <p className='my-[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
 
             <Link href='/user-details' className='btn mt-8'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
 
             {regFlowStart}
+            {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}
             <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full ">Logout</button>
         </>)
 }
