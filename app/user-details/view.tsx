@@ -5,6 +5,10 @@ import Loading from "../components/loading"
 import { supabase } from "../utils/public/supabase"
 import { Attendee } from "../utils/types"
 import Avatar from "./avatar"
+import { verifyAge } from "../utils/age-verification"
+
+const minimumConventionAge = Number(process.env.NEXT_PUBLIC_CON_MIN_AGE)
+const conventionDate = Number(process.env.NEXT_PUBLIC_CON_DATE)
 
 interface UserDetailsViewProps {
     attendee: Attendee | null
@@ -22,6 +26,7 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
     useEffect(() => {
         if (attendee) {
             setTempAttendee(attendee)
+            checkDob(new Date(attendee.dob))
         }
     }, [attendee])
 
@@ -120,6 +125,13 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
 
         return `${year}-${month}-${day}`;
     };
+
+    const checkDob = (date: Date) => {
+        if (!verifyAge(date)) {
+            setError(`You must be over ${minimumConventionAge} on ${formatDate(new Date(conventionDate))} to attend, without valid ID indicating you are over ${minimumConventionAge} you will be refused entry.`)
+        }
+    }
+
     return (
         <>
             {updatePending && <Loading />}
@@ -147,7 +159,10 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                                 onInvalid={handleInvalidLegalNameField}
                                 required />
                             <label className="label mt-2" >Date of Birth</label>
-                            <input type="date" className="input" value={tempAttendee?.dob ? formatDate(new Date(tempAttendee.dob)) : ''} required onChange={(e) => setTempAttendee({ ...tempAttendee, dob: new Date(e.target.value).toISOString() })}
+                            <input type="date" className="input" value={tempAttendee?.dob ? formatDate(new Date(tempAttendee.dob)) : ''} required onChange={(e) => {
+                                setTempAttendee({ ...tempAttendee, dob: new Date(e.target.value).toISOString() })
+                                checkDob(new Date(e.target.value))
+                            }}
                                 onInput={handleInput}
                                 onInvalid={handleInvalidDobField}
                             ></input>

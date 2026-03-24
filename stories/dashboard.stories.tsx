@@ -64,3 +64,14 @@ export const WithRegClosed: Story = {
         regEndTime: Date.now() - 1000,
     }
 }
+
+
+export const WitBelowMinimumAgeUnregisteredState: Story = {
+    args: {
+        attendee: { ...defaultMockAttendee, dob: new Date().toISOString() },
+        registration: null,
+        logout: () => { },
+        regStartTime: Date.now() - 1000,
+        regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+    }
+};
