@@ -20,7 +20,7 @@ export default function NavBar({loggedIn, logout}: NavBarProps) {
         <nav className='navbar w-full h-25 flex flex-row px-2 bg-base-100 justify-between shadow-sm md:px-10'>
 
             <div className="navbar-start h-full w-auto">
-                <a href='/' className='mr-auto shrink-0  h-full' >
+                <a href={home} className='mr-auto shrink-0  h-full' >
                     <img src='/logo.webp' className='h-full' />
                 </a></div>
 

@@ -34,7 +34,7 @@ export function AppView({
                 logout={logout}
             />
 
-            <div className="flex h-[100%] flex-col items-center justify-contet-space-between min-h-screen p-8 pt-0 pb-20 gap-16 font-[family-name:var(--font-inter)]">
+            <div className="flex h-[100%] flex-col items-center justify-contet-space-between p-8 pt-0 pb-20 gap-16 font-[family-name:var(--font-inter)]">
                 <main className="flex flex-col flex-grow gap-[32px] items-center">
                     <div className="w-[20rem] sm:w-[25rem] flex justify-center mr-auto ml-auto mt-6 relative mb-[-28%] sm:mb-[-26%]">
                         <img
