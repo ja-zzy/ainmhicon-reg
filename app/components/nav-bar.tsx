@@ -17,7 +17,7 @@ export default function NavBar({loggedIn, logout}: NavBarProps) {
     const dealers = `${linkRoot}/dealers-den`
     const contact = `${linkRoot}/contact`
     return (
-        <nav className='navbar w-full h-25 flex flex-row px-2 bg-base-100 justify-between shadow-sm md:px-10'>
+        <nav className='navbar w-full h-25 flex flex-row px-2 bg-base-200 justify-between shadow-[0_0_15px_3px_var(--color-base-200)] md:px-10'>
 
             <div className="navbar-start h-full w-auto">
                 <a href={home} className='mr-auto shrink-0  h-full' >
@@ -33,7 +33,7 @@ export default function NavBar({loggedIn, logout}: NavBarProps) {
                     <LinkButton href={dealers}>Dealer's Den</LinkButton>
                     <LinkButton href={contact}>Contact</LinkButton>
                     {!loggedIn && <LinkButton href='/'>Login</LinkButton>}
-                    {loggedIn && <button className={`btn scale-100 transition-all duration-250 ease-in-out hover:scale-110`} onClick={logout}>Logout</button>}
+                    {loggedIn && <button className={`btn scale-100 transition-all duration-250 ease-in-out hover:scale-110 rounded-4xl`} onClick={logout}>Logout</button>}
                 </div>
 
                 <div className="dropdown visible md:hidden">

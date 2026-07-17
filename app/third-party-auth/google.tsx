@@ -8,7 +8,7 @@ export function Google() {
                     redirectTo: window.location.origin
                 }
             })
-        }}><GoogleButton /></button>
+        }} className='cursor-pointer'><GoogleButton /></button>
     )
 }
 

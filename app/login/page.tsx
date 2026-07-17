@@ -3,6 +3,7 @@ import { FormEventHandler, useState } from 'react'
 import { supabase } from '../utils/public/supabase'
 import ErrorMessage from '../components/errorMessage'
 import { Google } from '../third-party-auth/google'
+import { Discord } from '../third-party-auth/discord'
 
 const checkEmailId = "login-carousel-check"
 const startId = "start"
@@ -40,7 +41,10 @@ export default function LoginPage() {
                     
                 </form>
                 <div className="divider">Or</div>
+                <div className='flex flex-col gap-2'>
                 <Google/>
+                <Discord/>
+                </div>
             </div>
             <div id={checkEmailId} className="carousel-item relative w-full flex flex-col justify-between" style={{ wordBreak: 'break-word' }}>
                 <p>Thanks, we've sent an email to <b>{email}</b>. If you don't receive it within the next few minutes, please check your spam box and ensure the email entered was correct!</p>
