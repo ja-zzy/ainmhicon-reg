@@ -1,10 +1,10 @@
 import type { Preview } from '@storybook/nextjs-vite'
-import { AppLayout } from '../app/app-layout'
+import { AppView } from '../app/app-view'
 
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <AppLayout withAuth={false}><Story /></AppLayout>
+      <AppView logout={() => {}} isLoggedIn={false}><Story /></AppView>
     )
   ],
   parameters: {

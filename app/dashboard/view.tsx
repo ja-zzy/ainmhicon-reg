@@ -111,7 +111,7 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
     const startRegComponent = (<>
         {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
         {(regEndTime - time <= (1000 * 60 * 60 * 24 * 7 /* 1 week */)) && regTimerEndComponent}
-        <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2026</Link>
+        <Link href='/reg' className={`btn rounded-md bg-base-100 text-base-content ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2027</Link>
     </>)
     const regClosedComponent = (
         <>
@@ -171,11 +171,11 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
             </>}
             {registration && <p className='my-[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
 
-            <Link href='/user-details' className='btn mt-8'>Update my details</Link>
+            <Link href='/user-details' className='btn mt-8 rounded-md bg-base-100 text-base-content'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
 
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}
-            <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full ">Logout</button>
+            <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full rounded-md">Logout</button>
         </>)
 }
