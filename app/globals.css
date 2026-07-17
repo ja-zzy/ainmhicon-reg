@@ -42,8 +42,8 @@
 @plugin "daisyui/theme" {
   name: "anv27";
   default: true;
-  prefersdark: false;
-  color-scheme: "light";
+  prefersdark: true;
+  color-scheme: "light dark";
   --color-base-100: #a1ab5a;
   --color-base-200: #223C1a;
   --color-base-300: #223C1a;
