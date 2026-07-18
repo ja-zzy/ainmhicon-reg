@@ -2,6 +2,9 @@
 import { AuthWrapper } from "./components/authWrapper";
 import { AuthProvider, useAuth } from "./context/authContext";
 import { AppView } from "./app-view";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Drawing } from "./components/drawing/types";
 
 export function AppLayout({
     children,
@@ -38,12 +41,26 @@ function AppLayoutConnectedContent({
     const {
         user,
         logout,
+        fetchAllDrawings
     } = useAuth();
 
+  const pathname = usePathname();
+
+  const noChrome = pathname === "/leaf-designer";
+
+      const [drawings, setDrawings] = useState<Drawing[]>([])
+
+      useEffect(() => {
+          fetchAllDrawings().then(d => setDrawings(d))
+      }, [fetchAllDrawings])
+  
+    
     return (
         <AppView
             isLoggedIn={!!user}
             logout={logout}
+            noChrome={noChrome}
+            footerDrawings={drawings}
         >
             {children}
         </AppView>

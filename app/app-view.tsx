@@ -1,6 +1,8 @@
 import "./globals.css";
 import { Inter, Sora } from "next/font/google";
 import NavBar from "./components/nav-bar";
+import { Drawing } from "./components/drawing/types";
+import { LeafArtwork } from "./components/drawing/leaf-svg";
 
 const interSans = Inter({
     variable: "--font-inter",
@@ -17,12 +19,16 @@ type AppViewProps = {
     children: React.ReactNode;
     isLoggedIn: boolean;
     logout: () => void;
+    noChrome?: boolean;
+    footerDrawings: Drawing[]
 };
 
 export function AppView({
     children,
     isLoggedIn,
     logout,
+    noChrome,
+    footerDrawings
 }: AppViewProps) {
     return (
         <div
@@ -36,20 +42,23 @@ export function AppView({
 
             <div className="flex h-[100%] flex-col items-center justify-contet-space-between p-8 pt-0 pb-20 gap-16 font-[family-name:var(--font-inter)]">
                 <main className="flex flex-col flex-grow gap-[32px] items-center">
-                    <div className="w-[20rem] sm:w-[25rem] flex justify-center mr-auto ml-auto mt-6 relative mb-[-28%] sm:mb-[-26%] min-h-45">
-                        <img
-                            src="roots.webp"
-                            alt="Logo"
-                            className="w-[20rem] sm:w-[25rem]"
-                        />
-                    </div>
-
-                    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 pt-12 sm:pt-16 pb-6 shadow-lg flex flex-col justify-center min-h-95">
+                    {!noChrome && (
+                        <div className="w-[20rem] sm:w-[25rem] flex justify-center mr-auto ml-auto mt-6 relative mb-[-28%] sm:mb-[-26%] min-h-45">
+                            <img
+                                src="roots.webp"
+                                alt="Logo"
+                                className="w-[20rem] sm:w-[25rem]"
+                            />
+                        </div>
+                    )}
+                    <fieldset className={noChrome ? '' : 'fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 pt-12 sm:pt-16 pb-6 shadow-lg flex flex-col justify-center min-h-95'}>
                         {children}
                     </fieldset>
                 </main>
-
                 <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+                    <div>
+                        {false && footerDrawings.map(d => <LeafArtwork drawing={d}/>)}
+                    </div>
                     Copyright Ainmhícon 2026
                     Ainmhícon, Company Limited by Guarantee, Company No. 793565
                 </footer>
