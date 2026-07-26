@@ -38,13 +38,18 @@ export default function LoginPage() {
                         required disabled={loading} />
                     <ErrorMessage error={error} />
                     <button type="submit" className="btn btn-neutral mt-2 rounded-md bg-base-100 py-3 w-full font-bold border-none text-base-content" disabled={loading}>{loading && <span className="loading loading-ring loading-md"></span>}{!loading && <>Send Magic Link</>}</button>
-                    
+
                 </form>
-                <div className="divider">Or</div>
-                <div className='flex flex-col gap-2'>
-                <Google/>
-                <Discord/>
-                </div>
+                {false && (
+                    <>
+                        <div className="divider">Or</div>
+                        <div className='flex flex-col gap-2'>
+                            <Google />
+                            <Discord />
+                        </div>
+                    </>
+                )}
+
             </div>
             <div id={checkEmailId} className="carousel-item relative w-full flex flex-col justify-between" style={{ wordBreak: 'break-word' }}>
                 <p>Thanks, we've sent an email to <b>{email}</b>. If you don't receive it within the next few minutes, please check your spam box and ensure the email entered was correct!</p>

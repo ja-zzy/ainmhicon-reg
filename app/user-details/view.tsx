@@ -185,12 +185,12 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                             <label className='label mt-2'>Do you plan on bringing a fursuit to Ainmhícon?</label>
                             <select className='input mb-3 select rounded-md border px-2 bg-transparent' name='fursuit' id='fursuit' value={tempAttendee?.fursuit}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, fursuit: e.target.value })}>
-                                <option value={"no"}>No</option>
-                                <option value={"partial"}>Yes - Partial Suit</option>
-                                <option value={"fullsuit"}>Yes - Full Suit</option>
+                                <option value={"no"} selected={tempAttendee?.fursuit === 'no'}>No</option>
+                                <option value={"partial"} selected={tempAttendee?.fursuit === 'partial'}>Yes - Partial Suit</option>
+                                <option value={"fullsuit"} selected={tempAttendee?.fursuit === 'fullsuit'}>Yes - Full Suit</option>
                             </select>
-                            {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === 'fullsuit') &&
-                                <div role='alert' className='alert alert-error alert-soft'>
+                            {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === "fullsuit") &&
+                                <div role='alert' className='alert alert-warning'>
                                     <span>Please be aware that we have limited storage space for fursuits!
                                         We highly suggest you do not bring your suit in a hardshell case, and opt for a soft shell or collapsible bag or suitcase instead</span>
                                 </div>
@@ -213,10 +213,10 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                             </textarea>
 
                             <ErrorMessage error={error} />
-                            <button type="submit" className="btn bg-base-100 text-base-content mt-4 w-full rounded-md">Update</button>
+                            {!updatesDisabled && <button type="submit" disabled={updatesDisabled} className="btn bg-base-100 text-base-content mt-4 w-full rounded-md">Update</button>}
                         </form>
                     </fieldset>
-                    <button type="button" onClick={navigateBack} className="btn btn-neutral w-full mt-3 rounded-md">Cancel</button>
+                    <button type="button" onClick={navigateBack} className="btn btn-neutral w-full mt-3 rounded-md">{updatesDisabled ? 'Back': 'Cancel'}</button>
                 </div>
             )
             }

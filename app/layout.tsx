@@ -4,7 +4,7 @@ import { AppLayout } from "./app-layout";
 
 export const metadata: Metadata = {
   title: "Ainmhícon Registration",
-  description: "Register for Ainmhícon 2026!",
+  description: "Register for Ainmhícon 2027!",
 };
 
 export default function RootLayout({

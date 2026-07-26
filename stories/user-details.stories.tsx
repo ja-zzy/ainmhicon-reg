@@ -42,3 +42,12 @@ export const WithUserBelowMinimumAge: Story = {
         updateProfile: (_) => Promise.resolve(),
     }
 };
+
+export const WithFursuitSelected: Story = {
+    args: {
+        attendee: {...defaultMockAttendee, fursuit: 'partial'},
+        user: defaultMockUser,
+        onRedirect: () => { },
+        updateProfile: (_) => Promise.resolve(),
+    }
+};

@@ -115,7 +115,7 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
     </>)
     const regClosedComponent = (
         <>
-            <h3 className='mt-[24px] text-lg'>Registration for Ainmhícon 2026 is now closed</h3>
+            <h3 className='mt-[24px] text-lg'>Registration for Ainmhícon 2027 is now closed</h3>
             <p>Sorry if you didn't get to join us this year. Keep an eye on our socials for announcements about Ainmhícon 2027!</p>
             <div className='flex justify-evenly mt-[16px]'>
                 <a href='https://bsky.app/profile/ainmhicon.ie'>
@@ -165,7 +165,7 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
             </h2>
             {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <>
-                <p className='my-[8px]'>You are registered for Ainmhícon 2026!</p>
+                <p className='my-[8px]'>You are registered for Ainmhícon 2027!</p>
                 <p className='text-center font-bold'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
                 <p className='my-[8px]'>Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>
             </>}

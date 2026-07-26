@@ -19,11 +19,11 @@ export const defaultMockAttendee: Attendee = {
     emergency_contact_name: 'Ceol',
     emergency_contact_phone: '0832222222',
     medical_info: 'N/A',
-    fursuit: 'Yes'
+    fursuit: 'no'
 }
 
 export const defaultRegistration: Registration = {
-    ticket_type: 'Ainmhícon 2026 - Weekend Standard Ticket',
+    ticket_type: 'Ainmhícon 2027 - Weekend Standard Ticket',
     payment_status: 'paid',
     badge_id: 12345
 }

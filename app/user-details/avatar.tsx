@@ -53,7 +53,7 @@ export default function Avatar({ userProfilePic, onImageChanged, updatesDisabled
             >
                 <label
                     htmlFor={cropping ? undefined : 'profile-picture'}
-                    className={`w-[140px] h-[140px]  rounded-full m-auto ${!updatesDisabled && 'cursor-pointer'} relative group overflow-hidden text-black ${userProfilePic === 'loading' || !userProfilePic ? 'bg-base-100' : ''}`}
+                    className={`w-[140px] h-[140px]  rounded-full m-auto ${updatesDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} relative group overflow-hidden text-black ${userProfilePic === 'loading' || !userProfilePic ? 'bg-base-100' : ''}`}
                 >
                     {/* Image states */}
                     {!cropping && (<>
