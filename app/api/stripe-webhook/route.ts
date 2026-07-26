@@ -30,11 +30,10 @@ export async function POST(req: Request) {
         return new NextResponse('Missing UserID from Metadata!', { status: 500 })
     }
 
+    await clearUserCheckout(userId)
     switch (event.type) {
         case 'checkout.session.async_payment_succeeded':
         case 'checkout.session.completed':
-            await clearUserCheckout(userId)
-
             const lineItems = await stripe.checkout.sessions.listLineItems(event.data.object.id);
             const ticketType = lineItems.data[0]?.description || 'Unknown';
 
@@ -51,7 +50,6 @@ export async function POST(req: Request) {
 
         case 'checkout.session.async_payment_failed':
         case 'checkout.session.expired':
-            await clearUserCheckout(userId)
             const cancellationLineItems = await stripe.checkout.sessions.listLineItems(
                 event.data.object.id,
                 {
