@@ -66,7 +66,7 @@ export const WithRegClosed: Story = {
 }
 
 
-export const WitBelowMinimumAgeUnregisteredState: Story = {
+export const WithBelowMinimumAgeUnregisteredState: Story = {
     args: {
         attendee: { ...defaultMockAttendee, dob: new Date().toISOString() },
         registration: null,

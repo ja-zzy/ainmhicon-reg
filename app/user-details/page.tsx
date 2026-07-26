@@ -13,7 +13,7 @@ export default function UserDetailsPage() {
 
     return (
         <AuthWrapper requireAuth={true} allowIncompleteProfile={true}>
-            <UserDetailsView {...authProps} onRedirect={redirect} updatesDisabled={true} />
+            <UserDetailsView {...authProps} onRedirect={redirect} updatesDisabled={false} />
         </AuthWrapper >
     )
 }

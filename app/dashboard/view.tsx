@@ -111,11 +111,11 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
     const startRegComponent = (<>
         {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
         {(regEndTime - time <= (1000 * 60 * 60 * 24 * 7 /* 1 week */)) && regTimerEndComponent}
-        <Link href='/reg' className={`btn ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2026</Link>
+        <Link href='/reg' className={`btn rounded-md bg-base-100 text-base-content ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2027</Link>
     </>)
     const regClosedComponent = (
         <>
-            <h3 className='mt-[24px] text-lg'>Registration for Ainmhícon 2026 is now closed</h3>
+            <h3 className='mt-[24px] text-lg'>Registration for Ainmhícon 2027 is now closed</h3>
             <p>Sorry if you didn't get to join us this year. Keep an eye on our socials for announcements about Ainmhícon 2027!</p>
             <div className='flex justify-evenly mt-[16px]'>
                 <a href='https://bsky.app/profile/ainmhicon.ie'>
@@ -165,17 +165,17 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
             </h2>
             {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <>
-                <p className='my-[8px]'>You are registered for Ainmhícon 2026!</p>
+                <p className='my-[8px]'>You are registered for Ainmhícon 2027!</p>
                 <p className='text-center font-bold'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
                 <p className='my-[8px]'>Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>
             </>}
             {registration && <p className='my-[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
 
-            <Link href='/user-details' className='btn mt-8'>Update my details</Link>
+            <Link href='/user-details' className='btn mt-8 rounded-md bg-base-100 text-base-content'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
 
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}
-            <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full ">Logout</button>
+            <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full rounded-md">Logout</button>
         </>)
 }

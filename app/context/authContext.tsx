@@ -32,10 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading: true,
         error: null
     })
-    useEffect(() => {
-        console.log('AuthProvider mounted')
-        return () => console.log('AuthProvider unmounted')
-    }, [])
     const router = useRouter()
     const pathname = usePathname()
 

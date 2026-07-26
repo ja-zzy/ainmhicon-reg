@@ -147,19 +147,19 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                             <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/#faq' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
                             <br />
                             <label className="label mt-2">First Name</label>
-                            <input type="text" className="input" placeholder="Ceol" value={tempAttendee?.first_name || ''}
+                            <input type="text" className="input rounded-md border py-3 px-2 bg-transparent" placeholder="Ceol" value={tempAttendee?.first_name || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, first_name: e.target.value })}
                                 onInput={handleInput}
                                 onInvalid={handleInvalidLegalNameField}
                                 required />
                             <label className="label mt-2">Last Name</label>
-                            <input type="text" className="input" placeholder="Púcas" value={tempAttendee?.last_name || ''}
+                            <input type="text" className="input rounded-md border py-3 px-2 bg-transparent" placeholder="Púcas" value={tempAttendee?.last_name || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, last_name: e.target.value })}
                                 onInput={handleInput}
                                 onInvalid={handleInvalidLegalNameField}
                                 required />
                             <label className="label mt-2" >Date of Birth</label>
-                            <input type="date" className="input" value={tempAttendee?.dob ? formatDate(new Date(tempAttendee.dob)) : ''} required onChange={(e) => {
+                            <input type="date" className="input rounded-md border py-3 px-2 bg-transparent" value={tempAttendee?.dob ? formatDate(new Date(tempAttendee.dob)) : ''} required onChange={(e) => {
                                 setTempAttendee({ ...tempAttendee, dob: new Date(e.target.value).toISOString() })
                                 checkDob(new Date(e.target.value))
                             }}
@@ -168,55 +168,55 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                             ></input>
                             <div className="divider">Additional Information</div>
                             <label className="label">Nickname &#40;Displayed on your badge&#41;</label>
-                            <input type="text" className="input" placeholder="Fuzzball" value={tempAttendee?.nickname || ''}
+                            <input type="text" className="input rounded-md border py-3 px-2 bg-transparent" placeholder="Fuzzball" value={tempAttendee?.nickname || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, nickname: e.target.value })}
                                 required />
                             <label className="label mt-2">Phone Number</label>
-                            <input type="tel" className="input" placeholder="089 011 0123" value={tempAttendee?.phone || ''}
+                            <input type="tel" className="input rounded-md border py-3 px-2 bg-transparent" placeholder="089 011 0123" value={tempAttendee?.phone || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, phone: e.target.value })}
                                 onInput={handleInput}
                                 onInvalid={handleInvalidPhoneField}
                                 required />
                             <label className="label mt-2">Pronouns</label>
-                            <input type="text" className="input mb-3" placeholder="Optional" value={tempAttendee?.pronouns || ''}
+                            <input type="text" className="input mb-3 rounded-md border py-3 px-2 bg-transparent" placeholder="Optional" value={tempAttendee?.pronouns || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, pronouns: e.target.value })}
                             />
 
                             <label className='label mt-2'>Do you plan on bringing a fursuit to Ainmhícon?</label>
-                            <select className='input mb-3 select' name='fursuit' id='fursuit' value={tempAttendee?.fursuit}
+                            <select className='input mb-3 select rounded-md border px-2 bg-transparent' name='fursuit' id='fursuit' value={tempAttendee?.fursuit}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, fursuit: e.target.value })}>
-                                <option value={"no"}>No</option>
-                                <option value={"partial"}>Yes - Partial Suit</option>
-                                <option value={"fullsuit"}>Yes - Full Suit</option>
+                                <option value={"no"} selected={tempAttendee?.fursuit === 'no'}>No</option>
+                                <option value={"partial"} selected={tempAttendee?.fursuit === 'partial'}>Yes - Partial Suit</option>
+                                <option value={"fullsuit"} selected={tempAttendee?.fursuit === 'fullsuit'}>Yes - Full Suit</option>
                             </select>
-                            {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === 'fullsuit') &&
-                                <div role='alert' className='alert alert-error alert-soft'>
+                            {(tempAttendee.fursuit === "partial" || tempAttendee.fursuit === "fullsuit") &&
+                                <div role='alert' className='alert alert-warning'>
                                     <span>Please be aware that we have limited storage space for fursuits!
                                         We highly suggest you do not bring your suit in a hardshell case, and opt for a soft shell or collapsible bag or suitcase instead</span>
                                 </div>
                             }
 
                             <label className="label mt-2">Emergency Contact Name</label>
-                            <input type="text" className="input mb-3" placeholder='Seán Gull' value={tempAttendee?.emergency_contact_name || ''}
+                            <input type="text" className="input mb-3 rounded-md border py-3 px-2 bg-transparent" placeholder='Seán Gull' value={tempAttendee?.emergency_contact_name || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_name: e.target.value })}
                             />
 
                             <label className='label mt-2'>Emergency Contact Number</label>
-                            <input type='text' className='input mb-3' placeholder='085 987 65432' value={tempAttendee?.emergency_contact_phone || ''}
+                            <input type='text' className='input mb-3 rounded-md border py-3 px-2 bg-transparent' placeholder='085 987 65432' value={tempAttendee?.emergency_contact_phone || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, emergency_contact_phone: e.target.value })}
                             />
 
                             <label className="label mt-2 ">Accessibility Information and Medical Details</label>
-                            <textarea className="input min-h-[90px] rounded-xl p-[10px] whitespace-normal" placeholder='Let us know about any extra requirements we might be able to help with'
+                            <textarea className="input min-h-[90px] rounded-xl p-[10px] whitespace-normal bg-transparent" placeholder='Let us know about any extra requirements we might be able to help with'
                                 value={tempAttendee?.medical_info || ''}
                                 onChange={(e) => setTempAttendee({ ...tempAttendee, medical_info: e.target.value })}>
                             </textarea>
 
                             <ErrorMessage error={error} />
-                            <button type="submit" className="btn btn-neutral mt-4 w-full">Update</button>
+                            {!updatesDisabled && <button type="submit" disabled={updatesDisabled} className="btn bg-base-100 text-base-content mt-4 w-full rounded-md">Update</button>}
                         </form>
                     </fieldset>
-                    <button type="button" onClick={navigateBack} className="btn btn-neutral w-full mt-3">Cancel</button>
+                    <button type="button" onClick={navigateBack} className="btn btn-neutral w-full mt-3 rounded-md">{updatesDisabled ? 'Back': 'Cancel'}</button>
                 </div>
             )
             }

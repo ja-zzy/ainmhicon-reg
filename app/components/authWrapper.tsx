@@ -2,6 +2,7 @@
 import { useAuth } from '../context/authContext'
 import ErrorMessage from './errorMessage'
 import Loading from './loading'
+import NavBar from './nav-bar'
 
 interface AuthWrapperProps {
   children?: React.ReactNode
@@ -19,7 +20,10 @@ export function AuthWrapper({
   }
   // Show loading state
   if (loading) {
-    return <Loading />
+    return <div className='flex flex-col h-screen'>
+      <NavBar logout={() => {}}/>
+      <Loading />
+      </div>
   }
 
   // All checks passed, render children
