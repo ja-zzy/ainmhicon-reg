@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter, Sora } from "next/font/google";
 import NavBar from "./components/nav-bar";
+import { useEffect } from "react";
 
 const interSans = Inter({
     variable: "--font-inter",
@@ -36,7 +37,7 @@ export function AppView({
 
             <div className="flex h-[100%] flex-col items-center justify-contet-space-between p-8 pt-0 pb-20 gap-16 font-[family-name:var(--font-inter)]">
                 <main className="flex flex-col flex-grow gap-[32px] items-center">
-                    <div className="w-[20rem] sm:w-[25rem] flex justify-center mr-auto ml-auto mt-6 relative mb-[-28%] sm:mb-[-26%] min-h-45">
+                    <div className="w-[20rem] sm:w-[25rem] flex justify-center mr-auto ml-auto mt-6 relative mb-[-89px] sm:mb-[-103px] min-h-45">
                         <img
                             src="roots.webp"
                             alt="Logo"

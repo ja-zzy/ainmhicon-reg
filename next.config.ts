@@ -4,7 +4,7 @@ const isDev = process.env.NODE_ENV === 'development'
  
 const cspHeader = `
     default-src 'self' https://accounts.google.com/gsi/;
-    script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://accounts.google.com/gsi/client;
+    script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://accounts.google.com/gsi/client https://js.stripe.com;
     style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style;
     img-src 'self' blob: data: https://jxkruzcavimhseccupfu.supabase.co;
     font-src 'self';
@@ -14,6 +14,7 @@ const cspHeader = `
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
+    frame-src https://js.stripe.com/;
 `
 
 const nextConfig: NextConfig = {

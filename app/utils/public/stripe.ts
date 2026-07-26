@@ -19,7 +19,7 @@ export async function handleCheckout(userId: string, priceId: string, selectedDa
 }
 
 export async function getSelectedProduct(day: string, tier: string) {
-    const res = await fetch(`/api/get-selected-product?day=${encodeURIComponent(day)}&tier=${encodeURIComponent(tier)}`, {
+    const res = await fetch(`/api/get-selected-product?day=${encodeURIComponent(day.trim().toLowerCase())}&tier=${encodeURIComponent(tier.trim().toLowerCase())}`, {
         method: 'GET',
     })
 
@@ -32,7 +32,8 @@ export async function getTicketStock() {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/get-ticket-stock`, { method: 'GET' })
 
-    if (res.status !== 200) { throw new Error(res.statusText) }
+    if (res.status !== 200) { return new Set<number>() }
 
-    return await res.json();
+    const daysInStock = await res.json()
+    return new Set<number>(daysInStock);
 }
