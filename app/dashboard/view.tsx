@@ -170,16 +170,27 @@ export function DashboardView({ user, attendee, registration, logout, regStartTi
             <h2 className='font-[family-name:var(--font-sora)] text-xl text-center'>
                 Welcome back, {attendee.nickname}!
             </h2>
-            {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
+            {!registration && <p className='my-2'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <>
-                <p className='my-[8px]'>You are registered for Ainmhícon 2027!</p>
-                <p className='text-center font-bold'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
-                <p className='my-[8px]'>Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>
+                <div className="divider"/>
+                <p className='text-center font-bold text-md'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
+                <p className='mt-2 my-0 text-center'>Registration Number</p>
+                <h3 className='text-2xl my-0 font-bold text-center'>{registration.badge_id}</h3>
+                <div className="divider"/>
+                <p>When you arrive at the convention please report to ConOps! You will need:</p>
+                <ul className="p-2">
+                    <li  className="before:content-['✓'] before:mr-2">
+                        Your registration number
+                    </li>
+                    <li className="before:content-['✓'] before:mr-2">
+                        <a className='underline text-info' href='https://ainmhicon.ie/code-of-conduct#id'>Valid ID</a> showing your date of birth
+                    </li>
+                </ul>
             </>}
-            {registration && <p className='my-[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
+            {registration && <p className='my-[8px]'>If you wish to cancel or upgrade your ticket please email: <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
 
-            <Link href='/user-details' className='btn mt-8 rounded-md bg-base-100 text-base-content'>Update my details</Link>
-            {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
+            <Link href='/user-details' className='btn mt-8 rounded-md btn-secondary'>Update my details</Link>
+            {registration && <Link href='/hotel-booking' className='btn btn-secondary rounded-md'>Booking the Venue Hotel</Link>}
 
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}

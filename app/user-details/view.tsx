@@ -213,7 +213,7 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
                             </textarea>
 
                             <ErrorMessage error={error} />
-                            {!updatesDisabled && <button type="submit" disabled={updatesDisabled} className="btn bg-base-100 text-base-content mt-4 w-full rounded-md">Update</button>}
+                            {!updatesDisabled && <button type="submit" disabled={updatesDisabled} className="btn btn-secondary mt-4 w-full rounded-md">Update</button>}
                         </form>
                     </fieldset>
                     <button type="button" onClick={navigateBack} className="btn btn-neutral w-full mt-3 rounded-md">{updatesDisabled ? 'Back': 'Cancel'}</button>

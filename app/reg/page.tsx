@@ -9,7 +9,6 @@ import { getSelectedProduct, handleCheckout } from "../utils/public/stripe";
 import { useAuth } from "../context/authContext";
 import Loading from "../components/loading";
 import { days } from "../utils/day-mapping";
-import { getActiveCheckoutSession } from "../utils/private/supabase";
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
@@ -32,23 +31,25 @@ export default function RegPageForm() {
     const [loading, setLoading] = useState(true)
     const router = useRouter()
     const { user, attendee } = useAuth()
-
+    const [currentStep, setCurrentStep] = useState(window.location.hash === '#confirmation' ? 3 : 0)
     useEffect(() => {
         const load = async () => {
-            setLoading(true)
-            if(!user) { return }
-            if(!(await resumeCheckoutSession(user.id))) {
-               const ticketData = await getTicketStock()
-               setTicketData(ticketData)
+            if (!user) { return }
+            if (!(await resumeCheckoutSession(user.id))) {
+                const ticketData = await getTicketStock()
+                setTicketData(ticketData)
+                setLoading(false)
             }
+        }
+        if (currentStep !== 3) {
+            load()
+        } else {
             setLoading(false)
         }
-        load()
-        
+
     }, [user])
 
 
-    const [currentStep, setCurrentStep] = useState(window.location.hash === '#confirmation' ? 3 : 0)
     const [day, setDay] = useState<AttendanceDay | null>(null)
     const [tier, setTier] = useState<Tier | null>(null)
     const [loadingPayment, setLoadingPayment] = useState(false)
@@ -92,23 +93,79 @@ export default function RegPageForm() {
     // Confetti effect for success step
     useEffect(() => {
         if (currentStep !== STEPS.CONFIRMATION) return
-
-        var count = 200;
+        var count = 400;
         var defaults = {
             origin: { y: 0.7 }
         };
 
-        function fire(particleRatio: number, opts: { spread: number, startVelocity?: number, decay?: number, scalar?: number }) {
+        // TODO: Replace these with the leaf shapes from the leaf drawing branch when its ready.
+        const oakLeaf = confetti.shapeFromPath({
+            path: `M250 30
+C190 90 165 180 170 285
+C175 395 205 495 250 570
+C295 495 325 395 330 285
+C335 180 310 90 250 30
+Z`
+        });
+        const leaf1 = confetti.shapeFromPath({
+            path: `M250 30
+C220 75 175 75 145 120
+C175 145 115 205 55 220
+C125 260 95 330 45 375
+C120 390 155 465 130 520
+C190 510 225 550 250 570
+C275 550 310 510 370 520
+C345 465 380 390 455 375
+C405 330 375 260 445 220
+C385 205 325 145 355 120
+C325 75 280 75 250 30
+Z`
+        });
+        const leaf2 = confetti.shapeFromPath({
+            path: `M250 40
+C205 95 185 170 170 255
+C120 235 70 250 35 290
+C80 315 120 340 170 360
+C120 390 85 435 70 520
+C145 495 205 455 250 415
+C295 455 355 495 430 520
+C415 435 380 390 330 360
+C380 340 420 315 465 290
+C430 250 380 235 330 255
+C315 170 295 95 250 40
+Z`
+        });
+        const leaf3 = confetti.shapeFromPath({
+            path: `M250 30
+C145 45 55 145 65 285
+C75 425 155 520 250 570
+C345 520 425 425 435 285
+C445 145 355 45 250 30
+Z`
+        });
+
+        function fire(particleRatio: number, opts: { spread: number, startVelocity?: number, decay?: number, scalar?: number, drift?: number, ticks?: number }) {
             confetti({
                 ...defaults,
                 ...opts,
-                particleCount: Math.floor(count * particleRatio)
+                particleCount: Math.floor(count * particleRatio),
+                shapes: [oakLeaf, leaf1, leaf2, leaf3],
+                colors: [
+                    "#4F772D",
+                    "#8A9A3B",
+                    "#C97A2B",
+                    "#A63D2F",
+                    "#C9A227",
+                ],
+                scalar: 3
             });
         }
 
         fire(0.25, {
             spread: 26,
             startVelocity: 55,
+            drift: 0.7,
+            ticks: 100
         });
         fire(0.2, {
             spread: 60,
@@ -116,17 +173,26 @@ export default function RegPageForm() {
         fire(0.35, {
             spread: 100,
             decay: 0.91,
-            scalar: 0.8
+            drift: 2.1,
+            ticks: 200
+        });
+        fire(0.35, {
+            spread: 100,
+            decay: 0.91,
+            drift: -2.1,
+            ticks: 200
         });
         fire(0.1, {
             spread: 120,
             startVelocity: 25,
             decay: 0.92,
-            scalar: 1.2
+            drift: -0.7,
         });
         fire(0.1, {
             spread: 120,
             startVelocity: 45,
+            drift: 0.4,
+            ticks: 250
         });
     }, [currentStep])
 
@@ -313,7 +379,7 @@ export default function RegPageForm() {
                                                 In the meantime, you can update your details whenever you like from the dashboard
                                             </p>
                                             <button
-                                                className='btn btn-primary'
+                                                className='btn btn-secondary rounded-md'
                                                 onClick={() => router.push('/dashboard')}
                                             >
                                                 Return to dashboard
@@ -336,7 +402,7 @@ export default function RegPageForm() {
                 </div>
                 <button className="btn btn-sm btn-secondary bg-white text-error border-0 rounded-3xl" onClick={() => setCheckoutError(false)}>Okay</button>
             </div>
-            
+
         </AuthWrapper>
     )
 }

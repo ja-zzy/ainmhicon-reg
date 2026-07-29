@@ -15,6 +15,7 @@ const cspHeader = `
     frame-ancestors 'none';
     upgrade-insecure-requests;
     frame-src https://js.stripe.com/;
+    worker-src blob:;
 `
 
 const nextConfig: NextConfig = {
