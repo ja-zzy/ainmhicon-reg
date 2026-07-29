@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { stripe, stripeWebhookSecret } from '@/app/utils/private/stripe';
 import { addTicketToDays, clearUserCheckout, supabase } from '@/app/utils/private/supabase';
 import { getDayValue } from '@/app/utils/day-mapping';
+import { CURRENT_CON_ID } from '@/app/utils/constants';
 
 export async function POST(req: Request) {
     const rawBody = Buffer.from(await req.arrayBuffer())
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
 
             const { error } = await supabase
                 .from('registrations')
-                .upsert({ user_id: userId, payment_status: 'paid', convention_id: 1, ticket_type: ticketType })
+                .upsert({ user_id: userId, payment_status: 'paid', convention_id: CURRENT_CON_ID, ticket_type: ticketType })
 
             if (error) {
                 console.error('Supabase error when updating paid status', error);

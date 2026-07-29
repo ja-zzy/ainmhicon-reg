@@ -1,6 +1,6 @@
 "use client"
 
-import { getTicketStock as getTicketStock } from "../utils/public/stripe";
+import { getTicketStock as getTicketStock, resumeCheckoutSession } from "../utils/public/stripe";
 import { AuthWrapper } from "@/app/components/authWrapper";
 import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { getSelectedProduct, handleCheckout } from "../utils/public/stripe";
 import { useAuth } from "../context/authContext";
 import Loading from "../components/loading";
 import { days } from "../utils/day-mapping";
+import { getActiveCheckoutSession } from "../utils/private/supabase";
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
@@ -29,12 +30,23 @@ export default function RegPageForm() {
     const [ticketData, setTicketData] = useState<Set<number>>(new Set())
     const [checkoutError, setCheckoutError] = useState(false)
     const [loading, setLoading] = useState(true)
-    useEffect(() => {
-        getTicketStock().then(t => setTicketData(t)).finally(() => setLoading(false))
-    }, [])
-
     const router = useRouter()
     const { user, attendee } = useAuth()
+
+    useEffect(() => {
+        const load = async () => {
+            setLoading(true)
+            if(!user) { return }
+            if(!(await resumeCheckoutSession(user.id))) {
+               const ticketData = await getTicketStock()
+               setTicketData(ticketData)
+            }
+            setLoading(false)
+        }
+        load()
+        
+    }, [user])
+
 
     const [currentStep, setCurrentStep] = useState(window.location.hash === '#confirmation' ? 3 : 0)
     const [day, setDay] = useState<AttendanceDay | null>(null)
@@ -282,11 +294,10 @@ export default function RegPageForm() {
 
                                                     }
                                                 }}
-                                                className="btn btn-neutral w-full"
+                                                className="btn btn-neutral w-full max-w-94"
                                                 disabled={loadingPayment}
                                             >
-                                                {loadingPayment && <span className="loading loading-ring loading-md mr-2"></span>}
-                                                {loadingPayment ? 'Processing...' : 'Pay now'}
+                                                {loadingPayment ? (<span className="loading loading-ring loading-sm mr-2"></span>) : (<span>Pay now</span>)}
                                             </button>
                                         </div>
                                     </div>

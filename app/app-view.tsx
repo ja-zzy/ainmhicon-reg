@@ -50,8 +50,9 @@ export function AppView({
                     </fieldset>
                 </main>
 
-                <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-                    Copyright Ainmhícon 2026
+                <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center text-center">
+                    Copyright Ainmhicon 2026<br/><br/>
+
                     Ainmhícon, Company Limited by Guarantee, Company No. 793565
                 </footer>
             </div>

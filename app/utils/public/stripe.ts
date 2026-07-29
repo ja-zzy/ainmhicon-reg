@@ -1,4 +1,5 @@
 import { loadStripe } from "@stripe/stripe-js";
+import { supabase } from "./supabase";
 
 const stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PK
 
@@ -36,4 +37,19 @@ export async function getTicketStock() {
 
     const daysInStock = await res.json()
     return new Set<number>(daysInStock);
+}
+
+export async function resumeCheckoutSession(userId: string) {
+    const {data, error} = await supabase
+            .from('open_checkout_sessions')
+            .select('stripe_session_id')
+            .eq('user_id', userId)
+            .maybeSingle()
+    
+    if(!error && typeof data?.stripe_session_id === 'string') {
+        const stripe = await stripePromise;
+        await stripe?.redirectToCheckout({ sessionId: data.stripe_session_id })
+        return true
+    }
+    return false
 }
