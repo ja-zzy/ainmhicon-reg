@@ -118,7 +118,7 @@ export function DashboardView({ user, attendee, registration, logout, regStartTi
     const startRegComponent = (<>
         {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
         {(regEndTime - time <= (1000 * 60 * 60 * 24 * 7 /* 1 week */)) && regTimerEndComponent}
-        <Link href='/reg' className={`btn rounded-md bg-base-100 text-base-content ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2027</Link>
+        <Link href='/reg' className={`btn btn-secondary rounded-md ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2027</Link>
     </>)
     const regClosedComponent = (
         <>

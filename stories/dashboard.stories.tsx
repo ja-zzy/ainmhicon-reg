@@ -17,6 +17,7 @@ type Story = StoryObj<typeof meta>;
 
 export const DefaultRegisteredState: Story = {
     args: {
+        user: defaultMockUser,
         attendee: defaultMockAttendee,
         registration: defaultRegistration,
         logout: () => { },
@@ -27,6 +28,7 @@ export const DefaultRegisteredState: Story = {
 
 export const DefaultUnregisteredState: Story = {
     args: {
+        user: defaultMockUser,
         attendee: defaultMockAttendee,
         registration: null,
         logout: () => { },
@@ -37,6 +39,7 @@ export const DefaultUnregisteredState: Story = {
 
 export const WithPreRegTimer: Story = {
     args: {
+        user: defaultMockUser,
         attendee: defaultMockAttendee,
         registration: null,
         logout: () => { },
@@ -47,6 +50,7 @@ export const WithPreRegTimer: Story = {
 
 export const WithRegEndingTimer: Story = {
     args: {
+        user: defaultMockUser,
         attendee: defaultMockAttendee,
         registration: null,
         logout: () => { },
@@ -57,6 +61,7 @@ export const WithRegEndingTimer: Story = {
 
 export const WithRegClosed: Story = {
     args: {
+        user: defaultMockUser,
         attendee: defaultMockAttendee,
         registration: null,
         logout: () => { },
@@ -68,6 +73,7 @@ export const WithRegClosed: Story = {
 
 export const WithBelowMinimumAgeUnregisteredState: Story = {
     args: {
+        user: defaultMockUser,
         attendee: { ...defaultMockAttendee, dob: new Date().toISOString() },
         registration: null,
         logout: () => { },
