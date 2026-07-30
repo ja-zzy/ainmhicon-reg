@@ -8,6 +8,7 @@ import Telegram from "./social-logos/telegram";
 import { verifyAge } from "../utils/age-verification";
 import { User } from "@supabase/supabase-js";
 const minimumConventionAge = Number(process.env.NEXT_PUBLIC_CON_MIN_AGE)
+const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL
 
 interface DashboardViewProps {
     user: User | null
@@ -187,7 +188,7 @@ export function DashboardView({ user, attendee, registration, logout, regStartTi
                     </li>
                 </ul>
             </>}
-            {registration && <p className='my-[8px]'>If you wish to cancel or upgrade your ticket please email: <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
+            {registration && <p className='my-[8px]'>If you wish to cancel or upgrade your ticket please email: <a href={`mailto:${supportEmail}`} className='underline text-info'>{supportEmail}</a></p>}
 
             <Link href='/user-details' className='btn mt-8 rounded-md btn-secondary'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn btn-secondary rounded-md'>Booking the Venue Hotel</Link>}

@@ -126,7 +126,7 @@ export default function Avatar({ userProfilePic, onImageChanged, updatesDisabled
                             e.preventDefault()
                             setCropping(false)
                         }}
-                        className="btn btn-error"
+                        className="btn btn-primary"
                     >
                         Cancel
                     </button>
@@ -135,7 +135,7 @@ export default function Avatar({ userProfilePic, onImageChanged, updatesDisabled
                             e.preventDefault()
                             finishCropping()
                         }}
-                        className="btn btn-primary"
+                        className="btn btn-secondary"
                     >
                         Save
                     </button>
