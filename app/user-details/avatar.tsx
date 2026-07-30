@@ -57,7 +57,7 @@ export default function Avatar({ userProfilePic, onImageChanged, updatesDisabled
                 >
                     {/* Image states */}
                     {!cropping && (<>
-                        {userProfilePic === 'loading' && <Loading />}
+                        {userProfilePic === 'loading' && <Loading className='h-full'/>}
                         {!userProfilePic && <div className="text-l w-[140px] h-[140px] flex justify-center items-center text-center">No Badge!</div>}
                         {userProfilePic && userProfilePic !== 'loading' && (
                             <img src={userProfilePic} className="aspect-square w-full h-full object-cover" />
