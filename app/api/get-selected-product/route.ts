@@ -14,7 +14,7 @@ export async function GET(req: Request) {
             query: `active: \'true\' AND metadata[\'day\']: ${SqlString.escape(day)} AND metadata[\'tier\']: ${SqlString.escape(tier)}`,
             limit: 1
         })
-
+        
         return NextResponse.json(result.data[0]);
     } catch (e) {
         console.error("Can't find product", e);

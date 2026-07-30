@@ -6,9 +6,12 @@ import Bluesky from "./social-logos/bluesky";
 import Instagram from "./social-logos/instagram";
 import Telegram from "./social-logos/telegram";
 import { verifyAge } from "../utils/age-verification";
+import { User } from "@supabase/supabase-js";
 const minimumConventionAge = Number(process.env.NEXT_PUBLIC_CON_MIN_AGE)
+const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL
 
 interface DashboardViewProps {
+    user: User | null
     attendee: Attendee | null
     registration: Registration | null
     logout: () => void
@@ -16,7 +19,7 @@ interface DashboardViewProps {
     regEndTime: number
 }
 
-export function DashboardView({ attendee, registration, logout, regStartTime, regEndTime }: DashboardViewProps) {
+export function DashboardView({ user, attendee, registration, logout, regStartTime, regEndTime }: DashboardViewProps) {
     const [time, setTime] = useState(Date.now());
     const [showCancelled, setShowCancelled] = useState(false);
     const [showAgeError, setShowAgeError] = useState(false)
@@ -33,6 +36,11 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
             setShowCancelled(true);
             // Remove hash to avoid repeat message
             history.replaceState(null, "", window.location.pathname);
+            fetch('/api/clear-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user?.id })
+            })
         }
     }, []);
 
@@ -111,7 +119,7 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
     const startRegComponent = (<>
         {!sufficientDetailToPurchaseTicket && <p className='my-[8px]'>Before you register for a ticket you'll need to provide some additional information, please update your details.</p>}
         {(regEndTime - time <= (1000 * 60 * 60 * 24 * 7 /* 1 week */)) && regTimerEndComponent}
-        <Link href='/reg' className={`btn rounded-md bg-base-100 text-base-content ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2027</Link>
+        <Link href='/reg' className={`btn btn-secondary rounded-md ${!sufficientDetailToPurchaseTicket && 'btn-disabled'}`}>Register for Ainmhícon 2027</Link>
     </>)
     const regClosedComponent = (
         <>
@@ -150,29 +158,40 @@ export function DashboardView({ attendee, registration, logout, regStartTime, re
 
     return (
         <>
-            <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-base-300 h-6 w-6 shrink-0">
+            <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current h-6 w-6 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div>
                     <h3 className="font-bold">Payment cancelled</h3>
                     <div className="text-xs">Sorry, your payment did not complete. You have not been charged. Please try again later.</div>
                 </div>
-                <button className="btn btn-sm btn-secondary" onClick={() => setShowCancelled(false)}>Okay</button>
+                <button className="btn btn-sm btn-secondary bg-white text-error border-0 rounded-3xl" onClick={() => setShowCancelled(false)}>Okay</button>
             </div>
-            <h2 className='font-[family-name:var(--font-sora)] text-xl'>
+            <h2 className='font-[family-name:var(--font-sora)] text-xl text-center'>
                 Welcome back, {attendee.nickname}!
             </h2>
-            {!registration && <p className='my-[8px]'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
+            {!registration && <p className='my-2'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <>
-                <p className='my-[8px]'>You are registered for Ainmhícon 2027!</p>
-                <p className='text-center font-bold'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
-                <p className='my-[8px]'>Your badge number is <b>#{registration.badge_id}</b>, we're looking forward to seeing you soon!</p>
+                <div className="divider"/>
+                <p className='text-center font-bold text-md'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
+                <p className='mt-2 my-0 text-center'>Registration Number</p>
+                <h3 className='text-2xl my-0 font-bold text-center'>{registration.badge_id}</h3>
+                <div className="divider"/>
+                <p>When you arrive at the convention please report to ConOps! You will need:</p>
+                <ul className="p-2">
+                    <li  className="before:content-['✓'] before:mr-2">
+                        Your registration number
+                    </li>
+                    <li className="before:content-['✓'] before:mr-2">
+                        <a className='underline text-info' href='https://ainmhicon.ie/code-of-conduct#id'>Valid ID</a> showing your date of birth
+                    </li>
+                </ul>
             </>}
-            {registration && <p className='my-[8px]'><em>If you wish to cancel or upgrade your ticket please email:</em> <a href='reg@ainmhicon.ie' className='underline text-info'>reg@ainmhicon.ie</a></p>}
+            {registration && <p className='my-[8px]'>If you wish to cancel or upgrade your ticket please email: <a href={`mailto:${supportEmail}`} className='underline text-info'>{supportEmail}</a></p>}
 
-            <Link href='/user-details' className='btn mt-8 rounded-md bg-base-100 text-base-content'>Update my details</Link>
-            {registration && <Link href='/hotel-booking' className='btn'>Booking the Venue Hotel</Link>}
+            <Link href='/user-details' className='btn mt-8 rounded-md btn-secondary'>Update my details</Link>
+            {registration && <Link href='/hotel-booking' className='btn btn-secondary rounded-md'>Booking the Venue Hotel</Link>}
 
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}
