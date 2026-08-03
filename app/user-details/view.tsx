@@ -145,7 +145,7 @@ export function UserDetailsView({ attendee, user, updateProfile, onRedirect, upd
 
                             <Avatar userProfilePic={userProfilePic} onImageChanged={imageChangeHandler} updatesDisabled={updatesDisabled} />
                             <div className="divider">Legal Information</div>
-                            <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/#faq' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
+                            <label>It's <b>very important</b> this information matches your <u><a href='https://ainmhicon.ie/code-of-conduct#id' target="_blank">Government Issued ID</a></u>. You will not be allowed access to the convention if it does not match, so please double check!</label>
                             <br />
                             <label className="label mt-2">First Name</label>
                             <input type="text" className="input rounded-md border py-3 px-2 bg-transparent" placeholder="Ceol" value={tempAttendee?.first_name || ''}
