@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Attendee, Registration } from "../utils/types";
+import { Achievement as AchievementType, Attendee, Registration } from "../utils/types";
 import moment from "moment";
 import Link from "next/link";
 import Bluesky from "./social-logos/bluesky";
@@ -7,6 +7,7 @@ import Instagram from "./social-logos/instagram";
 import Telegram from "./social-logos/telegram";
 import { verifyAge } from "../utils/age-verification";
 import { User } from "@supabase/supabase-js";
+import Achievement from "../components/achievement-badge";
 const minimumConventionAge = Number(process.env.NEXT_PUBLIC_CON_MIN_AGE)
 const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL
 
@@ -17,9 +18,10 @@ interface DashboardViewProps {
     logout: () => void
     regStartTime: number
     regEndTime: number
+    achievements: AchievementType[] | null
 }
 
-export function DashboardView({ user, attendee, registration, logout, regStartTime, regEndTime }: DashboardViewProps) {
+export function DashboardView({ user, attendee, registration, logout, achievements, regStartTime, regEndTime }: DashboardViewProps) {
     const [time, setTime] = useState(Date.now());
     const [showCancelled, setShowCancelled] = useState(false);
     const [showAgeError, setShowAgeError] = useState(false)
@@ -196,5 +198,8 @@ export function DashboardView({ user, attendee, registration, logout, regStartTi
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}
             <button onClick={() => logout()} className="btn btn-neutral mt-8 w-full rounded-md">Logout</button>
+            <div className='absolute bottom-[-80px] pointer-fine:bottom-[-56px] left-0 flex justify-center items-center w-full gap-4 pointer-fine:gap-2'>
+                {achievements?.map(a => <Achievement key={a} achievementName={a}/>)}
+            </div>
         </>)
 }

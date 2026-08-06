@@ -16,3 +16,7 @@ export type Registration = {
     payment_status: string
     badge_id: number
 }
+
+export type Achievement =
+    '2026_attendee' |
+    '2027_attendee'

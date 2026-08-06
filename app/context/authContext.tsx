@@ -2,9 +2,10 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
-import { Attendee, Registration } from '../utils/types'
+import { Achievement, Attendee, Registration } from '../utils/types'
 import { supabase } from '../utils/public/supabase'
 import { CURRENT_CON_ID } from '../utils/constants'
+import { conventionIdToAttendeeAchievement } from '../utils/achievement-mappings'
 
 interface AuthState {
     user: User | null
@@ -12,6 +13,7 @@ interface AuthState {
     registration: Registration | null
     loading: boolean
     error: string | null
+    achievements: string[]
 }
 
 interface AuthContextType extends AuthState {
@@ -30,7 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         attendee: null,
         registration: null,
         loading: true,
-        error: null
+        error: null,
+        achievements: []
     })
     const router = useRouter()
     const pathname = usePathname()
@@ -50,8 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     await fetchUserProfile(session.user)
                     await fetchRegistration(session.user)
                     setAuthState(prev => ({ ...prev, loading: false }))
+
+                    // Achievements aren't that important so just load them after loading everything else
+                    await fetchAchievements(session.user)
                 } else {
-                    setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null })
+                    setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null, achievements: [] })
                 }
             } catch (err) {
                 setAuthState(prev => ({
@@ -74,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     await fetchUserProfile(session.user)
                     setAuthState(prev => ({ ...prev, loading: false }))
                 } else if (event === 'SIGNED_OUT') {
-                    setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null })
+                    setAuthState({ user: null, attendee: null, registration: null, loading: false, error: null, achievements: [] })
                     router.replace('/login')
                 }
             }, 0)
@@ -172,6 +178,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }))
         }
     }
+
+    const fetchAchievements = async (user: User) => {
+        const { data: allRegistrations, error } = await supabase
+            .from('registrations')
+            .select('*')
+            .eq('user_id', user.id)
+        const achievements: Achievement[] = 
+            allRegistrations
+                ?.filter(r => r.payment_status === 'paid' && conventionIdToAttendeeAchievement.has(r.convention_id))
+                .map(r => conventionIdToAttendeeAchievement.get(r.convention_id)!) ?? []
+            
+        setAuthState(prev => ({ ...prev, achievements }))
+    }
+
     const requireAuth = (allowIncompleteProfile = false) => {
         const { user, attendee, loading } = authState
 
