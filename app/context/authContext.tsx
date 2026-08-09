@@ -13,7 +13,7 @@ interface AuthState {
     registration: Registration | null
     loading: boolean
     error: string | null
-    achievements: string[]
+    achievements: Achievement[]
 }
 
 interface AuthContextType extends AuthState {
