@@ -237,18 +237,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const updateLeaf = async (update: Drawing) => {
         if (!authState.user) { return }
 
-        try {
-            const { error } = await supabase
-                .from('leaf_drawings')
-                .upsert({ ...update, user_id: authState.user.id })
+        const { error } = await supabase
+            .from('leaf_drawings')
+            .upsert({ ...update, user_id: authState.user.id })
 
-            if (error) throw error
-        } catch (err) {
-            setAuthState(prev => ({
-                ...prev,
-                error: err instanceof Error ? err.message : 'Failed to update profile'
-            }))
-        }
+        if (error) throw error
     }
 
     const fetchAllDrawings = async () => {
