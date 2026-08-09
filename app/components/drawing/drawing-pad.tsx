@@ -7,26 +7,40 @@ import { BackgroundColor, backgroundColors, Drawing, Leaf, leafShapes, Stroke, S
 import { Eraser, PaintBucket, Palette, Pen, Redo, Save, Trash, Undo, X } from "lucide-react";
 import simplify from "simplify-js";
 
-const compressStrokes = (strokes: Stroke[]) => {
-    return strokes.map(s => ({
-        ...s, points:
-            simplify(
-                s.points.map(([x, y]) => ({
-                    x: Number((Math.round(x * 100) / 100).toFixed(2)),//Math.round(x),
-                    y: Number((Math.round(y * 100) / 100).toFixed(2)),//Math.round(y)
-                })),
-                0.1,
-                true
-            ).map(({ x, y }) => [x, y])
-    }))
+const MIN_POINT_DISTANCE = 1.5;
 
+function compressStroke(stroke: Stroke): Stroke {
+    // Larger brushes can tolerate larger centerline errors.
+    const tolerance = 0.02
+
+    const simplified = simplify(
+        stroke.points.map(([x, y]) => ({
+            x,
+            y,
+        })),
+        tolerance,
+        true
+    );
+
+    return {
+        ...stroke,
+        points: simplified.map(({ x, y }) => [
+            Number(x.toFixed(2)),
+            Number(y.toFixed(2)),
+        ]),
+    };
 }
+
+function compressStrokes(strokes: Stroke[]): Stroke[] {
+    return strokes.map(compressStroke);
+}
+
 function getObjectSizeKB(obj: unknown) {
     const json = JSON.stringify(obj);
 
     const bytes = new TextEncoder().encode(json).length;
 
-    return (bytes / 1024).toFixed(2);
+    return Number((bytes / 1024).toFixed(2));
 }
 
 function randomKey(o: Object) {
@@ -44,6 +58,7 @@ export function DrawingPad({ drawing = { strokes: [], background_color: randomKe
     const [currentStroke, setCurrentStroke] = useState<number[][]>([]);
     const [undoStack, setUndoStack] = useState<Stroke[][]>([]);
     const [redoStack, setRedoStack] = useState<Stroke[][]>([]);
+    const [showSizeError, setShowSizeError] = useState(false)
 
     function commitHistory() {
         setUndoStack(prev => [...prev, strokes]);
@@ -71,16 +86,29 @@ export function DrawingPad({ drawing = { strokes: [], background_color: randomKe
         canvasRef.current?.setPointerCapture(e.pointerId);
         setCurrentStroke([point]);
     }
-
     function pointerMove(e: React.PointerEvent) {
         if (!currentStroke.length || tool === "erase")
             return;
 
-        const point = getCanvasPoint(e)
+        const point = getCanvasPoint(e);
+
         if (!point)
             return;
 
-        setCurrentStroke(prev => [...prev, point]);
+        setCurrentStroke(prev => {
+            const last = prev[prev.length - 1];
+
+            if (
+                Math.hypot(
+                    point[0] - last[0],
+                    point[1] - last[1]
+                ) < MIN_POINT_DISTANCE
+            ) {
+                return prev;
+            }
+
+            return [...prev, point];
+        });
     }
 
     function pointerUp() {
@@ -203,15 +231,13 @@ export function DrawingPad({ drawing = { strokes: [], background_color: randomKe
             leaf_template: selectedLeaf,
             strokes: compressStrokes(strokes)
         }
-
-        const base: Drawing = {
-            background_color: backgroundColor,
-            leaf_template: selectedLeaf,
-            strokes: (strokes)
+        const objSize = getObjectSizeKB(compressed)
+        console.log(`${objSize}kb`)
+        if (objSize > 100) {
+            setShowSizeError(true)
+        } else {
+            onSave(compressed)
         }
-        console.log(`base ${getObjectSizeKB(base)}kb`)
-        console.log(`compressed ${getObjectSizeKB(compressed)}kb`)
-        onSave(compressed)
 
     }
 
@@ -225,140 +251,151 @@ export function DrawingPad({ drawing = { strokes: [], background_color: randomKe
 
 
     return (
-        <div className="flex h-screen flex-col gap-4">
-            <a href='/' className='absolute top-28 right-2'><UIIcon onClick={() => { }} title='Close'><X className="m-auto" /></UIIcon></a>
-            <div className={`flex flex-col gap-4 h-full`}>
-                <div className='flex flex-wrap gap-4 items-center'>
-                    <div className="flex gap-4 md:gap-8 w-full justify-between flex-col md:flex-row">
-                        <div className="flex flex-wrap justify-evenly gap-y-4 md:gap-y-8">
-                            <UIIcon title='Draw' onClick={() => setTool("draw")} inactive={tool === 'erase'} noHover={tool === 'draw'}>
-                                <Pen className="m-auto" />
-                            </UIIcon>
-                            <UIIcon onClick={() => setTool("erase")} title='Erase' inactive={tool === 'draw'} noHover={tool === 'erase'}>
-                                <Eraser className="m-auto" />
-                            </UIIcon>
-                            <UIIcon title='Undo' onClick={undo}>
-                                <Undo className="m-auto" />
-                            </UIIcon>
-                            <UIIcon title='Redo' onClick={redo}>
-                                <Redo className="m-auto" />
-                            </UIIcon>
-                            <PaletteDropdown swatches={strokeColors} currentColor={strokeColor} icon='brush' onSwatchClick={(name) => {
-                                setStrokeColor(name as StrokeColor);
-                                setTool("draw");
-                            }}
-                            />
-                            <PaletteDropdown swatches={backgroundColors} currentColor={backgroundColor} icon='fill' onSwatchClick={(name) => {
-                                setBackgroundColor(name as BackgroundColor);
-                            }}
-                            />
-                            <div className="dropdown">
-                                <UIIcon title='Leaf shape' onClick={() => { }}>
-                                    <svg width="32" viewBox="0 0 500 600" className="m-auto">
-                                        <path d={leafShapes[selectedLeaf]} fill='currentcolor' />
-                                    </svg>
+        <>
+            <div className="flex h-screen flex-col gap-4">
+                <a href='/' className='absolute top-28 right-2'><UIIcon onClick={() => { }} title='Close'><X className="m-auto" /></UIIcon></a>
+                <div className={`flex flex-col gap-4 h-full bg-base-200 rounded-2xl`}>
+                    <div className='flex flex-wrap gap-4 items-center'>
+                        <div className="flex gap-4 md:gap-8 w-full justify-between flex-col md:flex-row">
+                            <div className="flex flex-wrap justify-evenly gap-y-4 md:gap-y-8">
+                                <UIIcon title='Draw' onClick={() => setTool("draw")} inactive={tool === 'erase'} noHover={tool === 'draw'}>
+                                    <Pen className="m-auto" />
                                 </UIIcon>
-                                <ul
-                                    tabIndex={-1}
-                                    className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-4 gap-4 shadow-lg right-0 md:left-0 top-8`}
-                                >
-                                    {Object.entries(leafShapes).map(([name, shape]) =>
-                                        <button key={name} className='flex flex-row gap-4 items-center text-lg'
-                                            onClick={() =>
-                                                setSelectedLeaf(name as Leaf)
-                                            }
-                                        >
-                                            <svg width="24" viewBox="0 0 500 600">
-                                                <path d={shape} fill='currentcolor' />
-                                            </svg>
-                                            <span className="capitalize">
-                                                {name}
-                                            </span>
-                                        </button>
-                                    )}
-                                </ul>
-                            </div>
-                            <div className="flex gap-2 ml-4 items-center text-nowrap">
-                                Brush size
-                                <input
-                                    type="range"
-                                    min="4"
-                                    max="40"
-                                    step="4"
-                                    value={strokeWidth}
-                                    onChange={e => setStrokeWidth(Number(e.target.value))}
-                                    className="range range-neutral"
+                                <UIIcon onClick={() => setTool("erase")} title='Erase' inactive={tool === 'draw'} noHover={tool === 'erase'}>
+                                    <Eraser className="m-auto" />
+                                </UIIcon>
+                                <UIIcon title='Undo' onClick={undo}>
+                                    <Undo className="m-auto" />
+                                </UIIcon>
+                                <UIIcon title='Redo' onClick={redo}>
+                                    <Redo className="m-auto" />
+                                </UIIcon>
+                                <PaletteDropdown swatches={strokeColors} currentColor={strokeColor} icon='brush' onSwatchClick={(name) => {
+                                    setStrokeColor(name as StrokeColor);
+                                    setTool("draw");
+                                }}
                                 />
+                                <PaletteDropdown swatches={backgroundColors} currentColor={backgroundColor} icon='fill' onSwatchClick={(name) => {
+                                    setBackgroundColor(name as BackgroundColor);
+                                }}
+                                />
+                                <div className="dropdown">
+                                    <UIIcon title='Leaf shape' onClick={() => { }}>
+                                        <svg width="32" viewBox="0 0 500 600" className="m-auto">
+                                            <path d={leafShapes[selectedLeaf]} fill='currentcolor' />
+                                        </svg>
+                                    </UIIcon>
+                                    <ul
+                                        tabIndex={-1}
+                                        className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-4 gap-4 shadow-lg right-0 md:left-0 top-8`}
+                                    >
+                                        {Object.entries(leafShapes).map(([name, shape]) =>
+                                            <button key={name} className='flex flex-row gap-4 items-center text-lg'
+                                                onClick={() =>
+                                                    setSelectedLeaf(name as Leaf)
+                                                }
+                                            >
+                                                <svg width="24" viewBox="0 0 500 600">
+                                                    <path d={shape} fill='currentcolor' />
+                                                </svg>
+                                                <span className="capitalize">
+                                                    {name}
+                                                </span>
+                                            </button>
+                                        )}
+                                    </ul>
+                                </div>
+                                <div className="flex gap-2 ml-4 items-center text-nowrap">
+                                    Brush size
+                                    <input
+                                        type="range"
+                                        min="4"
+                                        max="40"
+                                        step="4"
+                                        value={strokeWidth}
+                                        onChange={e => setStrokeWidth(Number(e.target.value))}
+                                        className="range range-neutral"
+                                    />
+                                </div>
+
                             </div>
 
-                        </div>
+                            <div className="flex gap-2 ml-auto">
 
-                        <div className="flex gap-2 ml-auto">
-
-                            <UIIcon title='Save' onClick={exportSvg}>
-                                <Save className="m-auto" />
-                            </UIIcon>
-                            <UIIcon title='Clear' onClick={clear} destructive>
-                                <Trash className="m-auto" />
-                            </UIIcon>
+                                <UIIcon title='Save' onClick={exportSvg}>
+                                    <Save className="m-auto" />
+                                </UIIcon>
+                                <UIIcon title='Clear' onClick={clear} destructive>
+                                    <Trash className="m-auto" />
+                                </UIIcon>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div
-                    className="relative flex-1 overflow-hidden rounded-xl border"
-                    style={{ backgroundColor }}
-                >
-                    <svg
-                        className="absolute inset-0 w-full m-auto"
-                        viewBox="0 0 500 600"
-                        preserveAspectRatio="none"
+                    <div
+                        className="relative flex-1 overflow-hidden rounded-xl border bg-neutral"
                     >
-                        <path
-                            d={leafShapes[selectedLeaf]}
-                            fill={backgroundColors[backgroundColor]}
-                            id='leafClip'
-                        />
-                        <foreignObject
-                            x="0"
-                            y="0"
-                            width="500"
-                            height="600"
-                            clipPath="url(#leafClip)"
+                        <svg
+                            className="absolute inset-0 w-full m-auto"
+                            viewBox="0 0 500 600"
+                            preserveAspectRatio="none"
                         >
-                            <div
-                                style={{ width: "100%", height: "100%" }}
+                            <path
+                                d={leafShapes[selectedLeaf]}
+                                fill={backgroundColors[backgroundColor]}
+                                id='leafClip'
+                            />
+                            <foreignObject
+                                x="0"
+                                y="0"
+                                width="500"
+                                height="600"
+                                clipPath="url(#leafClip)"
                             >
-                                <canvas
-                                    ref={canvasRef}
-                                    width={500}
-                                    height={600}
+                                <div
+                                    style={{ width: "100%", height: "100%" }}
+                                >
+                                    <canvas
+                                        ref={canvasRef}
+                                        width={500}
+                                        height={600}
 
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        touchAction: "none"
-                                    }}
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            touchAction: "none"
+                                        }}
 
-                                    onPointerDown={pointerDown}
-                                    onPointerMove={pointerMove}
-                                    onPointerUp={pointerUp}
+                                        onPointerDown={pointerDown}
+                                        onPointerMove={pointerMove}
+                                        onPointerUp={pointerUp}
 
-                                />
-                            </div>
-                        </foreignObject>
+                                    />
+                                </div>
+                            </foreignObject>
 
-                        {/* Leaf outline */}
-                        <path
-                            d={leafShapes[selectedLeaf]}
-                            fill="none"
-                            stroke="#999"
-                            strokeWidth="3"
-                            strokeDasharray="8 8"
-                        />
-                    </svg>
+                            {/* Leaf outline */}
+                            <path
+                                d={leafShapes[selectedLeaf]}
+                                fill="none"
+                                stroke="#999"
+                                strokeWidth="3"
+                                strokeDasharray="8 8"
+                            />
+                        </svg>
+                    </div>
                 </div>
             </div>
-        </div>
+            <div role={showSizeError ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${showSizeError ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current h-6 w-6 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 className="font-bold">Too Complicated!</h3>
+                    <div className="text-xs">Sorry, your leaf is a bit complicated. Try erasing some stuff and saving again</div>
+                </div>
+                <button className="btn btn-sm btn-secondary bg-white text-error border-0 rounded-3xl" onClick={() => setShowSizeError(false)}>Okay</button>
+            </div>
+        </>
     );
 }
 

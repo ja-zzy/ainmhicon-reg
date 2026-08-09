@@ -14,7 +14,7 @@ export function LeafArtwork({
     <svg
       viewBox="0 0 500 600"
       preserveAspectRatio="xMidYMid meet"
-      className='w-8 transition-[width] duration-150 hover:w-24 absolute'
+      className='w-48 transition-[width] duration-150 absolute z-10 left-0'
       style={{
         left: `${randomX}%`
       }}
