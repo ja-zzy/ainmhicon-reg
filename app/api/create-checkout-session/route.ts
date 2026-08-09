@@ -1,7 +1,8 @@
 import { CURRENT_CON_ID } from '@/app/utils/constants';
+import { days, getDayValue } from '@/app/utils/day-mapping';
 import { stripe } from '@/app/utils/private/stripe';
-import { supabase } from '@/app/utils/private/supabase';
-import { getTicketStock } from '@/app/utils/public/stripe';
+import { getTicketAvailability, getActiveCheckoutSession, isUserRegistered, removeTicketFromDays, startUserCheckout, supabase } from '@/app/utils/private/supabase';
+import { NextResponse } from 'next/server';
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
@@ -14,41 +15,44 @@ export async function POST(req: Request) {
     if (userId !== overrideUserId && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
     if (Date.now() > regEndTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is now closed" }) }
 
-    // We shouldn't let a user pay again if they're already registered, that'd be complicated
-    const { data: registration, error } = await supabase
-        .from('registrations')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('convention_id', CURRENT_CON_ID)
-        .maybeSingle()
-
-    const couponId = await getActiveCouponId();
-
-    const ticketStock = await getTicketStock();
-
-    const isSoldOut = (day: string) => {
-        const sold = parseInt(ticketStock[`tickets_sold_${day}`]);
-        const capacity = parseInt(ticketStock[`venue_capacity_${day}`]);
-
-        return sold >= capacity;
+    // Only let users who are fully registered buy a ticket
+    const { data: registration, error: regError } = await isUserRegistered(userId)
+    if (regError) {
+        return new NextResponse(`Error finding user with id ${userId}`, { status: 500 })
+    } else if (registration) {
+        return new NextResponse(`User with id ${userId} is already registered`, { status: 401 })
     }
 
-    const saturdaySoldOut = isSoldOut("sat")
-    const sundaySoldOut = isSoldOut("sun")
-    const weekendSoldOut = saturdaySoldOut || sundaySoldOut
+    // Don't let the user start another checkout session, otherwise an attacker could quickly drain the ticket stock
+    const userCheckingOut = await getActiveCheckoutSession(userId) != null
+    if (userCheckingOut) {
+        return new NextResponse(`User with id ${userId} is already in a checkout session`, { status: 401 })
+    }
+    let ticketStock;
+    try {
+        ticketStock = new Set(await getTicketAvailability());
+    } catch (error: any) {
+        return NextResponse.json(
+            { error: error.message },
+            { status: 500 }
+        );
+    }
 
+    const fridaySoldOut = !ticketStock.has(days.friday)
+    const saturdaySoldOut = !ticketStock.has(days.saturday)
+    const sundaySoldOut = !ticketStock.has(days.sunday)
+    const weekendSoldOut = fridaySoldOut || saturdaySoldOut || sundaySoldOut
+    const dayIndex = getDayValue(selectedDay.toLowerCase())
     const selectedDaySoldOut =
-        (selectedDay === "Saturday" && saturdaySoldOut) ||
-        (selectedDay === "Sunday" && sundaySoldOut) ||
-        (selectedDay === "Weekend" && weekendSoldOut)
+        selectedDay === "Full-Event"
+            ? weekendSoldOut
+            : !ticketStock.has(dayIndex)
 
     if (selectedDaySoldOut) {
-        return new Response(new Blob(), { status: 410, statusText: "Error. This ticket is no longer in stock" })
-    } else if (error) {
-        return new Response(new Blob(), { status: 500, statusText: "Error finding user with id " + userId })
-    } else if (registration) {
-        return new Response(new Blob(), { status: 401, statusText: "User is already registered" })
+    console.log(ticketStock, selectedDay)
+        return new NextResponse(`Sorry, tickets for ${selectedDay} have sold out and are no longer in stock`, { status: 410 })
     }
+
     try {
         const session = await stripe.checkout.sessions.create({
             line_items: [
@@ -58,9 +62,7 @@ export async function POST(req: Request) {
                 }
             ],
             mode: 'payment',
-            discounts: [{
-                coupon: couponId,
-            }],
+            discounts: [],
             success_url: `${req.headers.get('origin')}/reg#confirmation`,
             cancel_url: `${req.headers.get('origin')}/dashboard#payment-cancelled`,
             metadata: { userId },
@@ -75,20 +77,10 @@ export async function POST(req: Request) {
             expires_at: Math.floor(Date.now() / 1000) + 1820, // checkout session expires ~30 minutes after creation
         })
 
-        return Response.json({ sessionId: session.id })
+        await startUserCheckout(userId, session.id)
+        await removeTicketFromDays(selectedDay === 'Full-Event' ? null : dayIndex)
+        return NextResponse.json({ sessionId: session.id })
     } catch {
-        return new Response(new Blob(), { status: 500, statusText: "Stripe checkout error" })
+        return new NextResponse("Stripe checkout error", { status: 500 })
     }
-}
-
-async function getActiveCouponId() {
-    const coupons = await stripe.coupons.list();
-
-    const earlyBird = coupons.data.find((c) => c.name === 'Early Bird Discount (Until Oct 4th)');
-    if (earlyBird?.valid)
-        return earlyBird.id;
-
-    const standard = coupons.data.find((c) => c.name === 'Standard Fare (Until Jan 4th)');
-    if (standard?.valid)
-        return standard.id;
 }
