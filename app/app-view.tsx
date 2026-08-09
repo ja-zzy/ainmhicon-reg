@@ -41,16 +41,16 @@ export function AppView({
                         <img
                             src="roots.webp"
                             alt="Logo"
-                            className="w-[20rem] sm:w-[25rem]"
+                            className="w-[20rem] sm:w-[25rem] z-1"
                         />
                     </div>
 
-                    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 pt-12 sm:pt-16 pb-6 shadow-lg flex flex-col justify-center min-h-95">
+                    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 pt-12 sm:pt-16 pb-6 shadow-lg flex flex-col justify-center min-h-9 relative">
                         {children}
                     </fieldset>
                 </main>
 
-                <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center text-center">
+                <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center text-center mt-9 pointer-fine:mt-0">
                     Copyright Ainmhicon 2026<br/><br/>
 
                     Ainmhícon, Company Limited by Guarantee, Company No. 793565

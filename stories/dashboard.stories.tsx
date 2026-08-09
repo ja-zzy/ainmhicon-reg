@@ -23,6 +23,7 @@ export const DefaultRegisteredState: Story = {
         logout: () => { },
         regStartTime: Date.now() - 1000,
         regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+        achievements: null
     }
 };
 
@@ -34,6 +35,7 @@ export const DefaultUnregisteredState: Story = {
         logout: () => { },
         regStartTime: Date.now() - 1000,
         regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+        achievements: null
     }
 };
 
@@ -45,6 +47,7 @@ export const WithPreRegTimer: Story = {
         logout: () => { },
         regStartTime: Date.now() + (1000 * 60 * 60) /* 1 hour */,
         regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+        achievements: null
     }
 }
 
@@ -56,6 +59,7 @@ export const WithRegEndingTimer: Story = {
         logout: () => { },
         regStartTime: Date.now() - 1000,
         regEndTime: Date.now() + (1000 * 60 * 60 * 26) /* 1 day 2 hours */,
+        achievements: null
     }
 }
 
@@ -67,6 +71,7 @@ export const WithRegClosed: Story = {
         logout: () => { },
         regStartTime: Date.now() - 1000,
         regEndTime: Date.now() - 1000,
+        achievements: null
     }
 }
 
@@ -79,5 +84,30 @@ export const WithBelowMinimumAgeUnregisteredState: Story = {
         logout: () => { },
         regStartTime: Date.now() - 1000,
         regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+        achievements: null
+    }
+};
+
+export const WithOneAchievement: Story = {
+    args: {
+        user: defaultMockUser,
+        attendee: defaultMockAttendee,
+        registration: defaultRegistration,
+        logout: () => { },
+        regStartTime: Date.now() - 1000,
+        regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+        achievements: ['2026_attendee']
+    }
+};
+
+export const WithTwoAchievements: Story = {
+    args: {
+        user: defaultMockUser,
+        attendee: defaultMockAttendee,
+        registration: defaultRegistration,
+        logout: () => { },
+        regStartTime: Date.now() - 1000,
+        regEndTime: Date.now() + (1000 * 60 * 60 * 24 * 100) /* 100 days */,
+        achievements: ['2026_attendee', '2027_attendee']
     }
 };
