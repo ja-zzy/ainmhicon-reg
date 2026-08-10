@@ -194,6 +194,7 @@ export function DashboardView({ user, attendee, registration, logout, achievemen
 
             <Link href='/user-details' className='btn mt-8 rounded-md btn-secondary'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn btn-secondary rounded-md'>Booking the Venue Hotel</Link>}
+            {registration && registration.payment_status === 'paid' && <Link href='/leaf-designer' className='btn rounded-md btn-secondary'>Design a Leaf!</Link>}
 
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}

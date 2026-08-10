@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js'
 import { Achievement, Attendee, Registration } from '../utils/types'
 import { supabase } from '../utils/public/supabase'
 import { CURRENT_CON_ID } from '../utils/constants'
+import { Drawing, Leaf } from '../components/drawing/types'
 import { conventionIdToAttendeeAchievement } from '../utils/achievement-mappings'
 
 interface AuthState {
@@ -22,6 +23,9 @@ interface AuthContextType extends AuthState {
     logout: () => Promise<void>
     isAuthenticated: boolean
     hasCompleteProfile: boolean
+    updateLeaf: (drawing: Drawing) => Promise<void>
+    fetchAllDrawings: () => Promise<Drawing[]>
+    fetchUsersDrawing: () => Promise<Drawing | undefined>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -230,6 +234,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }))
         }
     }
+    const updateLeaf = async (update: Drawing) => {
+        if (!authState.user) { return }
+
+        const { error } = await supabase
+            .from('leaf_drawings')
+            .upsert({ ...update, user_id: authState.user.id })
+
+        if (error) throw error
+    }
+
+    const fetchAllDrawings = async () => {
+        const { data: drawings, error } = await supabase
+            .from('leaf_drawings')
+            .select('*')
+        return drawings as Drawing[]
+    }
+
+
+    const fetchUsersDrawing = async () => {
+        if (!authState.user) { return }
+        const { data: drawing, error } = await supabase
+            .from('leaf_drawings')
+            .select()
+            .eq('user_id', authState.user.id)
+            .single()
+
+        return drawing as Drawing
+    }
+
     const logout = async () => {
         await supabase.auth.signOut()
         setAuthState(prev => ({ ...prev, attendee: null, user: null }))
@@ -240,7 +273,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateProfile,
         logout,
         isAuthenticated: !!authState.user,
-        hasCompleteProfile: !!(authState.user && authState.attendee?.first_name)
+        hasCompleteProfile: !!(authState.user && authState.attendee?.first_name),
+        updateLeaf,
+        fetchAllDrawings,
+        fetchUsersDrawing
     }
 
     return (
