@@ -16,7 +16,6 @@ export function LeafArtwork({
   y,
   rotation = 0,
   scale = 1,
-  className = "",
 }: Readonly<Props>) {
   const leafPath = leafShapes[drawing.leaf_template];
   const left = x !== undefined ? `${x}%` : undefined;

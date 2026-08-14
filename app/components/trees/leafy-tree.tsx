@@ -14,7 +14,13 @@ type LeafPosition = {
     scale: number;
 }
 
-export function TreeArtworkBase({ count = 50 }: Readonly<Props>) {
+function randomLeafType(): "oak" | "elm" | "alder" | "willow" {
+  const leaves = ["oak", "elm", "alder", "willow"];
+
+  return leaves[Math.floor(Math.random()*leaves.length)] as "oak" | "elm" | "alder" | "willow";
+}
+
+export function LeafyTree({ count = 50 }: Readonly<Props>) {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const pathRef = useRef<SVGPathElement | null>(null);
     const [leaves, setLeaves] = useState<LeafPosition[]>([]);
@@ -29,7 +35,7 @@ export function TreeArtworkBase({ count = 50 }: Readonly<Props>) {
         const screenCTM = svg.getScreenCTM();
         if (!screenCTM) return;
 
-        const includeTopPercent = 60;
+        const includeTopPercent = 70;
         const leafPositionList: LeafPosition[] = [];
 
         while (leafPositionList.length < count) {
@@ -43,19 +49,29 @@ export function TreeArtworkBase({ count = 50 }: Readonly<Props>) {
             const left = ((screenPoint.x - rect.left) / rect.width) * 100;
             const top = ((screenPoint.y - rect.top) / rect.height) * 100;
 
-            const rotation = (left * 2.2) - (135 * Math.random());
+            const rotation = (left * 2.2) - (225 * Math.random());
 
-            // reject if in bottom X%
-            if (top >  includeTopPercent) {
+            if (top > includeTopPercent) {
                 continue;
             }
 
-            leafPositionList.push({
+            const leafToPlace = {
                 left: Math.max(0, Math.min(100, left)),
                 top: Math.max(0, Math.min(100, top)),
                 rotation: rotation,
                 scale: 0.3 + Math.random() * 0.3,
+            };
+
+            const minDistance = 2.5 + leafToPlace.scale * 8;
+            const leavesOverlap = leafPositionList.some((leaf) => {
+                const dx = leaf.left - leafToPlace.left;
+                const dy = leaf.top - leafToPlace.top;
+                return Math.hypot(dx, dy) < minDistance;
             });
+
+            if (!leavesOverlap) {
+                leafPositionList.push(leafToPlace);
+            }
         }
 
         setLeaves(leafPositionList);
@@ -105,7 +121,7 @@ export function TreeArtworkBase({ count = 50 }: Readonly<Props>) {
             {leaves.map((p, i) => (
                 <LeafArtwork
                     key={i}
-                    drawing={{ leaf_template: 'oak', background_color: 'olive', strokes: [] }}
+                    drawing={{ leaf_template: randomLeafType(), background_color: 'olive', strokes: [] }}
                     x={p.left}
                     y={p.top}
                     rotation={p.rotation}
