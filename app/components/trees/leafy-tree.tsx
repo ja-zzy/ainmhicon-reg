@@ -50,6 +50,7 @@ export function LeafyTree({ count = 50 }: Readonly<Props>) {
             const top = ((screenPoint.y - rect.top) / rect.height) * 100;
 
             const rotation = (left * 2.2) - (225 * Math.random());
+            const leafScale = 0.3 + Math.random() * 0.3;
 
             if (top > includeTopPercent) {
                 continue;
@@ -59,7 +60,7 @@ export function LeafyTree({ count = 50 }: Readonly<Props>) {
                 left: Math.max(0, Math.min(100, left)),
                 top: Math.max(0, Math.min(100, top)),
                 rotation: rotation,
-                scale: 0.3 + Math.random() * 0.3,
+                scale: leafScale,
             };
 
             const minDistance = 2.5 + leafToPlace.scale * 8;
