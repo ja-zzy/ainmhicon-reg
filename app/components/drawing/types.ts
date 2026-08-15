@@ -1,34 +1,27 @@
 export const strokeColors = {
-    // Earth & Soil
-    clay: "#A0522D",
-    stone: "#708090",
-    sand: "#E6D7C3",
-
-    // Trees & Bark
-    oak: "#4B382A",
-    willow: "#8A9A5B",
-    birch: "#DCDCDC",
-
-    // Plants & Foliage
-    fern: "#4F7942",
-    sage: "#9CAF88",
-    moss: "#355E3B",
-
-    // Flowers & Blooms
-    rose: "#E09090",
-    marigold: "#F59E0B",
-    lavendar: "#E6E6FA"
+   night: "#091413",
+   earth: "#61481C",
+   olive: "#87805E",
+   moss: "#66806A",
+   sage: "#999B84",
+   rose: "#926E6F",
+   coral: "#CA8A8B",
+   clay: "#A64B2A",
+   peach: "#FFC286",
+   sand: "#FFF1AF",
+   sky: "#8FBDD3",
+   cloud: "#BFC6C4",
 } as const;
 
 
 export type StrokeColor = keyof typeof strokeColors
 
 export const backgroundColors = {
-    olive: "#708238",
-    eucalyptus: "#9CB1A1",
-    autumn: "#9C6863",
-    bark: "#6E5F52",
-    ochre: "#D6C595",
+    bark: "#4B352A",
+    umber: "#CA7842",
+    golden: "#D7A94B",
+    glade: "#B2CD9C",
+    sprout: "#F0F2BD",
 };
 export type BackgroundColor = keyof typeof backgroundColors
 

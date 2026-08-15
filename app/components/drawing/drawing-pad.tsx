@@ -92,12 +92,19 @@ export function DrawingPad({drawing, onSave }: Props) {
         setCurrentStroke([point]);
     }
     function pointerMove(e: React.PointerEvent) {
-        if (!currentStroke.length || tool === "erase")
-            return;
-
+        if(e.buttons !== 1) {return }
+        e.preventDefault();
         const point = getCanvasPoint(e);
 
         if (!point)
+            return;
+
+        if (tool === "erase") {
+            erase(point);
+            return;
+        }
+
+        if (!currentStroke.length)
             return;
 
         setCurrentStroke(prev => {
@@ -262,11 +269,11 @@ export function DrawingPad({drawing, onSave }: Props) {
                 <div className={`flex flex-col gap-4 h-full bg-base-200 rounded-2xl`}>
                     <div className='flex flex-wrap gap-4 items-center'>
                         <div className="flex gap-4 md:gap-8 w-full justify-between flex-col md:flex-row">
-                            <div className="flex flex-wrap justify-evenly gap-y-4 md:gap-y-8">
-                                <UIIcon title='Draw' onClick={() => setTool("draw")} inactive={tool === 'erase'} noHover={tool === 'draw'}>
+                            <div className="flex flex-wrap justify-between gap-y-4 md:gap-y-8">
+                                <UIIcon title='Draw' onClick={() => setTool("draw")} activeTool={tool === 'draw'} noHover={tool === 'draw'}>
                                     <Pen className="m-auto" />
                                 </UIIcon>
-                                <UIIcon onClick={() => setTool("erase")} title='Erase' inactive={tool === 'draw'} noHover={tool === 'erase'}>
+                                <UIIcon onClick={() => setTool("erase")} title='Erase' activeTool={tool === 'erase'} noHover={tool === 'erase'}>
                                     <Eraser className="m-auto" />
                                 </UIIcon>
                                 <UIIcon title='Undo' onClick={undo}>
@@ -404,9 +411,9 @@ export function DrawingPad({drawing, onSave }: Props) {
     );
 }
 
-function UIIcon({ title, onClick, destructive, inactive, noHover, bgColor, children }: { title: string, destructive?: boolean, inactive?: boolean, noHover?: boolean, bgColor?: string, onClick: () => void } & React.PropsWithChildren) {
+function UIIcon({ title, onClick, destructive, activeTool, noHover, bgColor, children }: { title: string, destructive?: boolean, activeTool?: boolean, noHover?: boolean, bgColor?: string, onClick: () => void } & React.PropsWithChildren) {
     return (
-        <button className={`rounded-xl h-10 w-10 bg-base-200 text-base-100 ${destructive && 'bg-primary text-primary-content'} ${inactive && 'grayscale-75'} transition-all duration-150 ${!noHover && 'cursor-pointer hover:brightness-125'}`} title={title} onClick={onClick}
+        <button className={`rounded-xl h-10 w-10 bg-base-200 text-base-100 ${destructive && 'bg-primary text-primary-content'} ${activeTool && 'bg-secondary text-secondary-content'} transition-all duration-150 ${!noHover && 'cursor-pointer hover:brightness-125'}`} title={title} onClick={onClick}
             style={{ backgroundColor: bgColor }}>
             {children}
         </button>
