@@ -62,6 +62,7 @@ export async function POST(req: Request) {
             ],
             mode: 'payment',
             discounts: [],
+            allow_promotion_codes: true,
             success_url: `${req.headers.get('origin')}/reg#confirmation`,
             cancel_url: `${req.headers.get('origin')}/dashboard#payment-cancelled`,
             metadata: { userId },
