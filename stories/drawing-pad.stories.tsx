@@ -23,7 +23,7 @@ export const DefaultState: Story = {
 export const WithExistingDrawing: Story = {
     args: {
         drawing: {
-            "background_color": "eucalyptus",
+            "background_color": "glade",
             "leaf_template": "alder",
             "strokes": [
                 {
@@ -645,7 +645,7 @@ export const WithExistingDrawing: Story = {
                             407.36
                         ]
                     ],
-                    "color": "fern",
+                    "color": "clay",
                     "size": 10
                 },
                 {
@@ -803,7 +803,7 @@ export const WithExistingDrawing: Story = {
                             420.6
                         ]
                     ],
-                    "color": "fern",
+                    "color": "earth",
                     "size": 10
                 },
                 {
@@ -937,7 +937,7 @@ export const WithExistingDrawing: Story = {
                             425.77
                         ]
                     ],
-                    "color": "fern",
+                    "color": "rose",
                     "size": 10
                 },
                 {
@@ -991,7 +991,7 @@ export const WithExistingDrawing: Story = {
                             366.41
                         ]
                     ],
-                    "color": "fern",
+                    "color": "peach",
                     "size": 10
                 },
                 {
@@ -1009,7 +1009,7 @@ export const WithExistingDrawing: Story = {
                             393.81
                         ]
                     ],
-                    "color": "fern",
+                    "color": "sky",
                     "size": 10
                 }
             ]
