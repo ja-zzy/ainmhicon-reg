@@ -1,4 +1,3 @@
-import { CURRENT_CON_ID } from '@/app/utils/constants';
 import { days, getDayValue } from '@/app/utils/day-mapping';
 import { stripe } from '@/app/utils/private/stripe';
 import { getTicketAvailability, getActiveCheckoutSession, isUserRegistered, removeTicketFromDays, startUserCheckout, supabase } from '@/app/utils/private/supabase';
@@ -6,13 +5,13 @@ import { NextResponse } from 'next/server';
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
-const overrideUserId = process.env.OVERRIDE_USER_ID
+const overrideUserIds = process.env.OVERRIDE_USER_IDS?.split(',')
 const cocLink = process.env.CODE_OF_CONDUCT_LINK
 
 export async function POST(req: Request) {
     const { priceId, userId, selectedDay } = await req.json()
 
-    if (userId !== overrideUserId && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
+    if (overrideUserIds?.indexOf(userId) === -1 && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
     if (Date.now() > regEndTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is now closed" }) }
 
     // Only let users who are fully registered buy a ticket

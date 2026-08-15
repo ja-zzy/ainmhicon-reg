@@ -47,14 +47,19 @@ function randomKey(o: Object) {
     const keys = Object.keys(o)
     return keys[Math.floor(Math.random() * keys.length)]
 }
-export function DrawingPad({ drawing = { strokes: [], background_color: randomKey(backgroundColors) as BackgroundColor, leaf_template: randomKey(leafShapes) as Leaf }, onSave }: { drawing?: Drawing, onSave: (saved: Drawing) => void }) {
+interface Props { 
+    drawing?: Drawing;
+    onSave: (saved: Drawing) => void;
+}
+
+export function DrawingPad({drawing, onSave }: Props) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [strokeColor, setStrokeColor] = useState<StrokeColor>(randomKey(strokeColors) as StrokeColor);
-    const [backgroundColor, setBackgroundColor] = useState<BackgroundColor>(drawing.background_color);
+    const [backgroundColor, setBackgroundColor] = useState<BackgroundColor>(drawing ? drawing.background_color : randomKey(backgroundColors) as BackgroundColor);
     const [strokeWidth, setStrokeWidth] = useState(10);
     const [tool, setTool] = useState<"draw" | "erase">("draw");
-    const [selectedLeaf, setSelectedLeaf] = useState<Leaf>(drawing.leaf_template);
-    const [strokes, setStrokes] = useState<Stroke[]>(drawing.strokes);
+    const [selectedLeaf, setSelectedLeaf] = useState<Leaf>(drawing ? drawing.leaf_template : randomKey(leafShapes) as Leaf);
+    const [strokes, setStrokes] = useState<Stroke[]>(drawing ? drawing.strokes : []);
     const [currentStroke, setCurrentStroke] = useState<number[][]>([]);
     const [undoStack, setUndoStack] = useState<Stroke[][]>([]);
     const [redoStack, setRedoStack] = useState<Stroke[][]>([]);
