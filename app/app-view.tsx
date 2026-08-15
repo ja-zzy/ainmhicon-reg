@@ -2,8 +2,7 @@ import "./globals.css";
 import { Inter, Sora } from "next/font/google";
 import NavBar from "./components/nav-bar";
 import { Drawing } from "./components/drawing/types";
-import { LeafArtwork } from "./components/drawing/leaf-svg";
-import { useEffect } from "react";
+import { LeafyTree } from "./components/trees/leafy-tree";
 
 const interSans = Inter({
     variable: "--font-inter",
@@ -29,7 +28,6 @@ export function AppView({
     isLoggedIn,
     logout,
     noChrome,
-    footerDrawings
 }: AppViewProps) {
     return (
         <div
@@ -62,6 +60,10 @@ export function AppView({
 
                     Ainmhícon, Company Limited by Guarantee, Company No. 793565
                 </footer>
+
+                <div>
+                    <LeafyTree />
+                </div>
             </div>
         </div>
     );

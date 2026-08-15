@@ -3,20 +3,35 @@ import { backgroundColors, Drawing, leafShapes, strokeColors } from "./types";
 
 type Props = {
   drawing: Drawing;
+  x?: number;
+  y?: number;
+  rotation?: number;
+  scale?: number;
+  className?: string;
 };
 
 export function LeafArtwork({
   drawing,
-}: Props) {
+  x,
+  y,
+  rotation = 0,
+  scale = 1,
+}: Readonly<Props>) {
   const leafPath = leafShapes[drawing.leaf_template];
-  const randomX = 10 + (Math.random() * 80);
+  const left = x !== undefined ? `${x}%` : undefined;
+  const top = y !== undefined ? `${y}%` : undefined;
+  const transform = `translate(-50%,-100%) rotate(${rotation}deg) scale(${scale})`;
+
   return (
     <svg
       viewBox="0 0 500 600"
       preserveAspectRatio="xMidYMid meet"
-      className='w-48 transition-[width] duration-150 absolute z-10 left-0'
+      className={`w-48 transition-[width] duration-150 absolute z-10 left-0`}
       style={{
-        left: `${randomX}%`
+        left,
+        top,
+        transform,
+        transformOrigin: "bottom center",
       }}
     >
       <defs>
