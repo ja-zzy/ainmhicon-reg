@@ -228,7 +228,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
     return (
         <>
             <div className="flex h-screen flex-col gap-4">
-                <a href='/' className='absolute top-28 right-2'><UIIcon onClick={() => { }} title='Close'><X className="m-auto" /></UIIcon></a>
+                <a href='/' className='absolute top-28 right-2'><UIIcon title='Close'><X className="m-auto" /></UIIcon></a>
                 <div className={`flex flex-col gap-4 h-full bg-base-200 rounded-2xl`}>
                     <div className='flex flex-wrap gap-4 items-center'>
                         <div className="flex gap-4 md:gap-8 w-full justify-between flex-col md:flex-row">
@@ -255,7 +255,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                 }}
                                 />
                                 <div className="dropdown">
-                                    <UIIcon title='Leaf shape' onClick={() => { }}>
+                                    <UIIcon title='Leaf shape'>
                                         <svg width="32" viewBox="0 0 500 600" className="m-auto">
                                             <path d={leafShapes[selectedLeaf]} fill='currentcolor' />
                                         </svg>
@@ -380,9 +380,9 @@ export function DrawingPad({ drawing, onSave }: Props) {
     );
 }
 
-function UIIcon({ title, onClick, destructive, activeTool, noHover, bgColor, children }: { title: string, destructive?: boolean, activeTool?: boolean, noHover?: boolean, bgColor?: string, onClick: () => void } & React.PropsWithChildren) {
+function UIIcon({ title, onClick, destructive, activeTool, noHover, bgColor, children }: { title: string, destructive?: boolean, activeTool?: boolean, noHover?: boolean, bgColor?: string, onClick?: () => void } & React.PropsWithChildren) {
     return (
-        <button className={`rounded-xl h-10 w-10 bg-base-200 text-base-100 ${destructive && 'bg-primary text-primary-content'} ${activeTool && 'bg-secondary text-secondary-content'} transition-all duration-150 ${!noHover && 'cursor-pointer hover:brightness-125'}`} title={title} onClick={onClick}
+        <button tabIndex={0} className={`rounded-xl h-10 w-10 bg-base-200 text-base-100 ${destructive && 'bg-primary text-primary-content'} ${activeTool && 'bg-secondary text-secondary-content'} transition-all duration-150 ${!noHover && 'cursor-pointer hover:brightness-125'}`} title={title} onClick={onClick}
             style={{ backgroundColor: bgColor }}>
             {children}
         </button>
@@ -393,7 +393,7 @@ function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swat
     return (
 
         <div className="dropdown">
-            <UIIcon title='Brush color' onClick={() => { }} bgColor={swatches[currentColor as keyof typeof swatches]}>
+            <UIIcon title='Brush color' bgColor={swatches[currentColor as keyof typeof swatches]}>
                 {icon === 'brush' ? (<Palette className="m-auto invert mix-blend-difference" />) : <PaintBucket className="m-auto invert mix-blend-difference" />}
             </UIIcon>
             <ul
