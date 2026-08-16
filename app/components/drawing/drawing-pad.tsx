@@ -313,7 +313,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                             ref={svgRef}
                             className="absolute inset-0 w-full h-full m-auto"
                             viewBox="0 0 500 600"
-                            preserveAspectRatio="none"
+                            preserveAspectRatio="xMidYMid meet"
                             style={{
                                 touchAction: "none"
                             }}
