@@ -241,11 +241,11 @@ export function DrawingPad({drawing, onSave }: Props) {
         const compressed: Drawing = {
             background_color: backgroundColor,
             leaf_template: selectedLeaf,
-            strokes: compressStrokes(strokes)
+            strokes
         }
         const objSize = getObjectSizeKB(compressed)
         console.log(`${objSize}kb`)
-        if (objSize > 100) {
+        if (objSize > 1024) {
             setShowSizeError(true)
         } else {
             onSave(compressed)
