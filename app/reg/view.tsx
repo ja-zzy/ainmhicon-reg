@@ -220,7 +220,7 @@ Z`
             {/* Sliding Form Container */}
             <div className="flex flex-row items-center justify-around">
                 {<button className={`btn btn-circle w-[2rem] h-[2rem] btn-neutral mt-[53px] opacity-${canBackStep() ? '100' : '0'} transition-all duration-200`} onClick={() => { if (canBackStep()) { setCurrentStep(currentStep - 1) } }}>&lt;</button>}
-                <div className="relative w-[75%] overflow-hidden mb-auto max-w-[80vw] ">
+                <div className="relative w-[75%] overflow-hidden mb-auto max-w-[75vw] ">
                     <div
                         className="flex w-full h-full transition-transform duration-500 ease-in-out"
                         style={{ transform: `translateX(-${currentStep * 100}%)` }}
@@ -373,6 +373,7 @@ Z`
                 </div>
                 {<button className={`btn btn-circle w-[2rem] h-[2rem] btn-neutral mt-[53px] opacity-${canForwardStep() ? '100' : '0'} transition-all duration-200`} onClick={() => { if (canForwardStep()) { setCurrentStep(currentStep + 1) } }}>&gt;</button>}
             </div>
+            {currentStep !== 3 && (<a href={`${process.env.NEXT_PUBLIC_MARKETING_DOMAIN}/pricing`} target='_blank' className="w-full text-center underline mt-6">Pricing and Tier Reward info</a>)}
             <div role={checkoutError ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${checkoutError ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current h-6 w-6 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
