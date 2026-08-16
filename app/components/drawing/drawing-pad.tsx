@@ -70,13 +70,25 @@ export function DrawingPad({ drawing, onSave }: Props) {
         setRedoStack([]);
     }
     function getSvgPoint(e: React.PointerEvent) {
-        if (!svgRef.current) { return }
-        const rect = svgRef.current.getBoundingClientRect();
+        if (!svgRef.current) {
+            return;
+        }
 
-        return [
-            (e.clientX - rect.left) * (500 / rect.width),
-            (e.clientY - rect.top) * (600 / rect.height)
-        ];
+        const svg = svgRef.current;
+        const point = svg.createSVGPoint();
+
+        point.x = e.clientX;
+        point.y = e.clientY;
+
+        const ctm = svg.getScreenCTM();
+
+        if (!ctm) {
+            return;
+        }
+
+        const transformed = point.matrixTransform(ctm.inverse());
+
+        return [transformed.x, transformed.y];
     }
 
     function pointerDown(e: React.PointerEvent) {
