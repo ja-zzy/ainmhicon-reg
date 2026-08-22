@@ -17,10 +17,12 @@ export default function LeafDesigner() {
         <div className="w-full md:w-[80%] m-auto mt-16 p-12 bg-base-200 rounded-3xl">
             <div className={`flex flex-col gap-4 ${started && 'hidden'}`}>
                 <h1 className="font-[family-name:var(--font-sora)] text-xl">Design a Leaf!</h1>
-                <p>Help us spread our roots and grow! As a thank you for registering and showing your support we'd like to invite you to
-                    design your very own leaf which will appear on the website and in various places around the convention.
+                <p>
+                    Help us spread our roots and grow! As a thank you for registering and showing your support we'd like to invite you to
+                    design your very own leaf which will appear in various places around the convention.
                     <br /><br />
-                    Please <b>keep it SFW!</b> Leaves are associated with your account and will be removed if innappropriate.</p>
+                    Please <b>keep it SFW!</b> Leaves are associated with your account and will be removed if innappropriate. Craic & Ceòl are watching!
+                </p>
                 <button className='btn btn-secondary w-[50%] m-auto mt-8 rounded-lg' onClick={() => setStarted(true)}>Get started</button>
             </div>
             {started && fetched && <DrawingPad drawing={savedDrawing} onSave={(d) => authState.updateLeaf(d).catch(e => setError("Sorry, something went wrong when we tried to save your drawing."))}/>}

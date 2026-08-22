@@ -175,14 +175,14 @@ export function DashboardView({ user, attendee, registration, logout, achievemen
             </h2>
             {!registration && <p className='my-2'>Thanks for signing up, this is your user dashboard. From here you can register for our upcoming conventions</p>}
             {registration && <>
-                <div className="divider"/>
+                <div className="divider" />
                 <p className='text-center font-bold text-md'>{registration.ticket_type} <br /> {getAttendingDate(registration.ticket_type)}</p>
                 <p className='mt-2 my-0 text-center'>Registration Number</p>
                 <h3 className='text-2xl my-0 font-bold text-center'>{registration.badge_id}</h3>
-                <div className="divider"/>
+                <div className="divider" />
                 <p>When you arrive at the convention please report to ConOps! You will need:</p>
                 <ul className="p-2">
-                    <li  className="before:content-['✓'] before:mr-2">
+                    <li className="before:content-['✓'] before:mr-2">
                         Your registration number
                     </li>
                     <li className="before:content-['✓'] before:mr-2">
@@ -194,7 +194,7 @@ export function DashboardView({ user, attendee, registration, logout, achievemen
 
             <Link href='/user-details' className='btn mt-8 rounded-md btn-secondary'>Update my details</Link>
             {registration && <Link href='/hotel-booking' className='btn btn-secondary rounded-md'>Booking the Venue Hotel</Link>}
-            {registration && registration.payment_status === 'paid' && <Link href='/leaf-designer' className='btn rounded-md btn-secondary'>Design a Leaf!</Link>}
+            {registration && registration.payment_status === 'paid' && <Link href='/leaf-designer' className='btn rounded-md btn-secondary border-neutral border-2 mt-8'>Design a Leaf!</Link>}
 
             {regFlowStart}
             {showAgeError && <p className='mt-8 font-bold'>Attendees must be at least {minimumConventionAge} years old on the first day of the convention. Our records indicate you do not meet this requirement, so registration is not allowed. Please verify your Date of Birth on the <a href='/user-details' className='underline'>user details page</a></p>}

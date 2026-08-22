@@ -185,7 +185,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
         }
         const objSize = getObjectSizeKB(compressed)
         console.log(`${objSize}kb`)
-        if (objSize > 1024) {
+        if (objSize > 2048) {
             setShowSizeError(true)
         } else {
             onSave(compressed)
@@ -358,7 +358,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                 </svg>
                 <div>
                     <h3 className="font-bold">Too Complicated!</h3>
-                    <div className="text-xs">Sorry, your leaf is a bit complicated. Try erasing some stuff and saving again</div>
+                    <div className="text-xs">Sorry, your leaf is a bit complicated. Use the undo button to remove some stuff or click the trash button to start over</div>
                 </div>
                 <button className="btn btn-sm btn-secondary bg-white text-error border-0 rounded-3xl" onClick={() => setShowSizeError(false)}>Okay</button>
             </div>
