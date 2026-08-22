@@ -160,13 +160,13 @@ export function DashboardView({ user, attendee, registration, logout, achievemen
 
     return (
         <>
-            <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+            <div role={showCancelled ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] z-50 ${showCancelled ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current h-6 w-6 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div>
                     <h3 className="font-bold">Payment cancelled</h3>
-                    <div className="text-xs">Sorry, your payment did not complete. You have not been charged. Please try again later.</div>
+                    <div className="text-xs">Your payment was cancelled and you have not been charged.</div>
                 </div>
                 <button className="btn btn-sm btn-secondary bg-white text-error border-0 rounded-3xl" onClick={() => setShowCancelled(false)}>Okay</button>
             </div>
