@@ -39,7 +39,7 @@ export async function getTicketStock() {
     return new Set<number>(daysInStock);
 }
 
-export async function resumeCheckoutSession(userId: string) {
+export async function getActiveCheckoutSession(userId: string) {
     const {data, error} = await supabase
             .from('open_checkout_sessions')
             .select('stripe_session_id')
@@ -47,9 +47,11 @@ export async function resumeCheckoutSession(userId: string) {
             .maybeSingle()
     
     if(!error && typeof data?.stripe_session_id === 'string') {
-        const stripe = await stripePromise;
-        await stripe?.redirectToCheckout({ sessionId: data.stripe_session_id })
-        return true
+        return data.stripe_session_id
     }
-    return false
+}
+
+export async function redirectToCheckout(sessionId: string) {
+    const stripe = await stripePromise;
+    await stripe?.redirectToCheckout({sessionId})
 }
