@@ -172,7 +172,7 @@ export function RegView({ user, attendee, startingStep, ticketData, activeChecko
             <h2 className="text-xl">Checkout in Progress</h2>
             <p className="mt-2">You already have a checkout session in progress</p>
             <button className="btn btn-neutral w-full max-w-94 mt-6" onClick={() => redirectToCheckout(activeCheckoutSession)}>Continue Checkout</button>
-            <p className="mt-6">If you would like to <b>change your ticket type or dates</b>, please click the continue button above, and then click the back button <b>on the Stripe page</b> to cancel that order. Then come back to this page to restart the purchase process.</p>
+            <p className="mt-6">If you would like to <b>change your ticket type or dates</b>, please click the continue button above, and then click the back button <b>on the top left of the Stripe page</b> to cancel that order. Then come back to this page to restart the purchase process.</p>
             <img className='rounded-2xl md:hidden' src='stripe-help/mobile-cancel-stripe.webp' />
             <img className='rounded-2xl hidden md:block' src='stripe-help/desktop-cancel-stripe.webp' />
             </>
