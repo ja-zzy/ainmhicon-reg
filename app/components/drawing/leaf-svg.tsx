@@ -47,11 +47,19 @@ export function LeafArtwork({
             .join(" ");
 
           return (
-            <path
-              key={i}
-              d={d}
-              fill={strokeColors[stroke.color]}
-            />
+            stroke.type === 'eraser' ? (
+              <path
+                key={i}
+                d={d}
+                fill={backgroundColors[drawing.background_color]}
+              />
+            ) : (
+                <path
+                  key={i}
+                  d={d}
+                  fill={strokeColors[stroke.color]}
+                />
+              )
           );
         })}
       </g>
