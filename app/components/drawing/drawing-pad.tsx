@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { getStroke } from 'perfect-freehand';
-import { BackgroundColor, backgroundColors, Drawing, Leaf, leafShapes, Stroke, StrokeColor, strokeColors } from './types';
-import { Eraser, PaintBucket, Palette, Pen, Redo, Save, Trash, Undo, X } from 'lucide-react';
+import { useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { getStroke } from "perfect-freehand";
+import { BackgroundColor, backgroundColors, Drawing, Leaf, leafShapes, Stroke, StrokeColor, strokeColors } from "./types";
+import { Eraser, PaintBucket, Palette, Pen, Redo, Save, Trash, Undo, X } from "lucide-react";
 
 const MIN_POINT_DISTANCE = 1.5;
 
@@ -30,7 +30,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
     const [strokeColor, setStrokeColor] = useState<StrokeColor>(randomKey(strokeColors) as StrokeColor);
     const [backgroundColor, setBackgroundColor] = useState<BackgroundColor>(drawing ? drawing.background_color : randomKey(backgroundColors) as BackgroundColor);
     const [strokeWidth, setStrokeWidth] = useState(10);
-    const [tool, setTool] = useState<'draw' | 'erase'>('draw');
+    const [tool, setTool] = useState<"draw" | "erase">("draw");
     const [selectedLeaf, setSelectedLeaf] = useState<Leaf>(drawing ? drawing.leaf_template : randomKey(leafShapes) as Leaf);
     const [strokes, setStrokes] = useState<Stroke[]>(drawing ? drawing.strokes : []);
     const [currentStroke, setCurrentStroke] = useState<number[][]>([]);
