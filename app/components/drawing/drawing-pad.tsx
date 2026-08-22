@@ -5,35 +5,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { getStroke } from "perfect-freehand";
 import { BackgroundColor, backgroundColors, Drawing, Leaf, leafShapes, Stroke, StrokeColor, strokeColors } from "./types";
 import { Eraser, PaintBucket, Palette, Pen, Redo, Save, Trash, Undo, X } from "lucide-react";
-import simplify from "simplify-js";
 
 const MIN_POINT_DISTANCE = 1.5;
-
-function compressStroke(stroke: Stroke): Stroke {
-    // Larger brushes can tolerate larger centerline errors.
-    const tolerance = 0.02
-
-    const simplified = simplify(
-        stroke.points.map(([x, y]) => ({
-            x,
-            y,
-        })),
-        tolerance,
-        true
-    );
-
-    return {
-        ...stroke,
-        points: simplified.map(({ x, y }) => [
-            Number(x.toFixed(2)),
-            Number(y.toFixed(2)),
-        ]),
-    };
-}
-
-function compressStrokes(strokes: Stroke[]): Stroke[] {
-    return strokes.map(compressStroke);
-}
 
 function getObjectSizeKB(obj: unknown) {
     const json = JSON.stringify(obj);
@@ -94,10 +67,6 @@ export function DrawingPad({ drawing, onSave }: Props) {
     function pointerDown(e: React.PointerEvent) {
         const point = getSvgPoint(e);
         if (!point) { return }
-        if (tool === "erase") {
-            erase(point);
-            return;
-        }
 
         commitHistory();
         svgRef.current?.setPointerCapture(e.pointerId);
@@ -110,11 +79,6 @@ export function DrawingPad({ drawing, onSave }: Props) {
 
         if (!point)
             return;
-
-        if (tool === "erase") {
-            erase(point);
-            return;
-        }
 
         if (!currentStroke.length)
             return;
@@ -139,42 +103,35 @@ export function DrawingPad({ drawing, onSave }: Props) {
         if (!currentStroke.length)
             return;
 
-        setStrokes(prev => [
-            ...prev,
-            {
-                points: currentStroke,
-                color: strokeColor,
-                size: strokeWidth
-            }
-        ]);
+        const newStroke: Stroke =
+            tool === 'erase'
+                ? {
+                      type: 'eraser',
+                      points: currentStroke,
+                      size: strokeWidth
+                  }
+                : {
+                      type: 'stroke',
+                      points: currentStroke,
+                      color: strokeColor,
+                      size: strokeWidth
+                  };
+
+        setStrokes(prev => [...prev, newStroke]);
 
         setCurrentStroke([]);
-    }
-
-    function erase(point: number[]) {
-        commitHistory();
-        setStrokes(prev =>
-            prev.filter(stroke => {
-                return !stroke.points.some(p =>
-                    Math.hypot(
-                        p[0] - point[0],
-                        p[1] - point[1]
-                    ) < stroke.size * 3
-                );
-            })
-        );
     }
 
     function makePath(stroke: Stroke) {
         const outline =
             getStroke(
-                stroke.points,
-                {
-                    size: stroke.size,
-                    smoothing: 0.7,
-                    thinning: 0.7
-                }
-            );
+            stroke.points,
+            {
+                size: stroke.size,
+                smoothing: 0.7,
+                thinning: 0.7
+            }
+        );
 
         return outline
             .map(
@@ -182,6 +139,14 @@ export function DrawingPad({ drawing, onSave }: Props) {
                     `${i ? "L" : "M"}${x},${y}`
             )
             .join(" ");
+    }
+
+    function getStrokeFill(stroke: Stroke) {
+        if (stroke.type === 'eraser') {
+            return backgroundColors[backgroundColor];
+        }
+
+        return strokeColors[stroke.color];
     }
 
     function undo() {
@@ -263,8 +228,8 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                 }}
                                 />
                                 <PaletteDropdown swatches={backgroundColors} currentColor={backgroundColor} icon='fill' onSwatchClick={(name) => {
-                                    setBackgroundColor(name as BackgroundColor);
-                                }}
+                                        setBackgroundColor(name as BackgroundColor);
+                                    }}
                                 />
                                 <div className="dropdown">
                                     <UIIcon title='Leaf shape'>
@@ -278,17 +243,17 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                     >
                                         {Object.entries(leafShapes).map(([name, shape]) =>
                                             <button key={name} className='flex flex-row gap-4 items-center text-lg'
-                                                onClick={() =>
+                                                    onClick={() =>
                                                     setSelectedLeaf(name as Leaf)
-                                                }
-                                            >
+                                                    }
+                                                >
                                                 <svg width="24" viewBox="0 0 500 600">
                                                     <path d={shape} fill='currentcolor' />
-                                                </svg>
+                                                    </svg>
                                                 <span className="capitalize">
-                                                    {name}
-                                                </span>
-                                            </button>
+                                                        {name}
+                                                    </span>
+                                                </button>
                                         )}
                                     </ul>
                                 </div>
@@ -304,7 +269,6 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                         className="range range-neutral"
                                     />
                                 </div>
-
                             </div>
 
                             <div className="flex gap-2 ml-auto">
@@ -332,6 +296,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                             onPointerDown={pointerDown}
                             onPointerMove={pointerMove}
                             onPointerUp={pointerUp}
+                            onPointerCancel={pointerUp}
                         >
                             <defs>
                                 <clipPath id="leafClip">
@@ -346,23 +311,32 @@ export function DrawingPad({ drawing, onSave }: Props) {
 
                             <g clipPath="url(#leafClip)">
                                 {strokes.map((stroke, i) =>
-                                    <path
-                                        key={i}
-                                        d={makePath(stroke)}
-                                        fill={strokeColors[stroke.color]}
-                                    />
+                                        <path
+                                            key={i}
+                                            d={makePath(stroke)}
+                                            fill={getStrokeFill(stroke)}
+                                        />
                                 )}
 
-                                {currentStroke.length > 0 &&
+                                {currentStroke.length > 0 && (
                                     <path
-                                        d={makePath({
-                                            points: currentStroke,
-                                            color: strokeColor,
-                                            size: strokeWidth
-                                        })}
-                                        fill={strokeColors[strokeColor]}
+                                        d={makePath(
+                                            tool === 'erase'
+                                                ? {
+                                                      type: 'eraser',
+                                                      points: currentStroke,
+                                                      size: strokeWidth
+                                                  }
+                                                : {
+                                                      type: 'stroke',
+                                                      points: currentStroke,
+                                                      color: strokeColor,
+                                                      size: strokeWidth
+                                                  }
+                                        )}
+                                        fill={tool === 'erase' ? backgroundColors[backgroundColor] : strokeColors[strokeColor]}
                                     />
-                                }
+                                )}
                             </g>
 
                             {/* Leaf outline */}
@@ -415,24 +389,24 @@ function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swat
                     height: `${70 * Math.ceil(Object.keys(swatches).length / 3)}px`
                 }}>
                 {Object.entries(swatches).map(([name, color]) =>
-                    <div
-                        key={color}
+                        <div
+                            key={color}
                         className="flex flex-col items-center"
-                    >
-                        <button
+                        >
+                            <button
                             onClick={() => onSwatchClick(name)}
                             className={`h-8 w-8 rounded-full transition-all duration-150 outline-black outline ${currentColor !== name && 'cursor-pointer hover:brightness-125'}`}
-                            style={{
-                                backgroundColor: color,
+                                style={{
+                                    backgroundColor: color,
                                 outlineWidth: currentColor === name ? "3px" : "0"
-                            }}
-                        />
+                                }}
+                            />
 
                         <span className="capitalize">
-                            {name}
-                        </span>
-                    </div>
-                )
+                                {name}
+                            </span>
+                        </div>
+                    )
                 }
             </ul>
         </div>

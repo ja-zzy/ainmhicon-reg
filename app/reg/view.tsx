@@ -2,10 +2,11 @@
 
 import confetti from "canvas-confetti";
 import { useEffect, useState } from "react";
-import { getSelectedProduct, handleCheckout } from "../utils/public/stripe";
+import { getSelectedProduct, handleCheckout, redirectToCheckout } from "../utils/public/stripe";
 import { days } from "../utils/day-mapping";
 import { User } from "@supabase/supabase-js";
 import { Attendee } from "../utils/types";
+import { leafShapes } from "../components/drawing/types";
 
 const regStartTime = Number(process.env.NEXT_PUBLIC_REG_START_TIME)
 const regEndTime = Number(process.env.NEXT_PUBLIC_REG_END_TIME)
@@ -28,9 +29,10 @@ interface RegViewProps {
     onRedirect: () => void
     startingStep?: number
     ticketData: Set<number>
+    activeCheckoutSession?: string
 }
 
-export function RegView({ user, attendee, startingStep, ticketData, onRedirect }: RegViewProps) {
+export function RegView({ user, attendee, startingStep, ticketData, activeCheckoutSession, onRedirect }: RegViewProps) {
     const [checkoutError, setCheckoutError] = useState(false)
     const [currentStep, setCurrentStep] = useState(startingStep || 0)
 
@@ -84,49 +86,17 @@ export function RegView({ user, attendee, startingStep, ticketData, onRedirect }
         };
 
         // TODO: Replace these with the leaf shapes from the leaf drawing branch when its ready.
-        const oakLeaf = confetti.shapeFromPath({
-            path: `M250 30
-C190 90 165 180 170 285
-C175 395 205 495 250 570
-C295 495 325 395 330 285
-C335 180 310 90 250 30
-Z`
+        const oak = confetti.shapeFromPath({
+            path: leafShapes.oak
         });
-        const leaf1 = confetti.shapeFromPath({
-            path: `M250 30
-C220 75 175 75 145 120
-C175 145 115 205 55 220
-C125 260 95 330 45 375
-C120 390 155 465 130 520
-C190 510 225 550 250 570
-C275 550 310 510 370 520
-C345 465 380 390 455 375
-C405 330 375 260 445 220
-C385 205 325 145 355 120
-C325 75 280 75 250 30
-Z`
+        const elm = confetti.shapeFromPath({
+            path: leafShapes.elm
         });
-        const leaf2 = confetti.shapeFromPath({
-            path: `M250 40
-C205 95 185 170 170 255
-C120 235 70 250 35 290
-C80 315 120 340 170 360
-C120 390 85 435 70 520
-C145 495 205 455 250 415
-C295 455 355 495 430 520
-C415 435 380 390 330 360
-C380 340 420 315 465 290
-C430 250 380 235 330 255
-C315 170 295 95 250 40
-Z`
+        const alder = confetti.shapeFromPath({
+            path: leafShapes.alder
         });
-        const leaf3 = confetti.shapeFromPath({
-            path: `M250 30
-C145 45 55 145 65 285
-C75 425 155 520 250 570
-C345 520 425 425 435 285
-C445 145 355 45 250 30
-Z`
+        const willow = confetti.shapeFromPath({
+            path: leafShapes.willow
         });
 
         function fire(particleRatio: number, opts: { spread: number, startVelocity?: number, decay?: number, scalar?: number, drift?: number, ticks?: number }) {
@@ -134,7 +104,7 @@ Z`
                 ...defaults,
                 ...opts,
                 particleCount: Math.floor(count * particleRatio),
-                shapes: [oakLeaf, leaf1, leaf2, leaf3],
+                shapes: [oak, elm, alder, willow],
                 colors: [
                     "#4F772D",
                     "#8A9A3B",
@@ -196,6 +166,18 @@ Z`
 
     const stepTitles = ['Attendance', 'Ticket Tier', 'Payment', 'Confirmation']
 
+    if(activeCheckoutSession) {
+        return (
+            <>
+            <h2 className="text-xl">Checkout in Progress</h2>
+            <p className="mt-2">You already have a checkout session in progress</p>
+            <button className="btn btn-neutral w-full max-w-94 mt-6" onClick={() => redirectToCheckout(activeCheckoutSession)}>Continue Checkout</button>
+            <p className="mt-6">If you would like to <b>change your ticket type or dates</b>, please click the continue button above, and then click the back button <b>on the top left of the Stripe page</b> to cancel that order. Then come back to this page to restart the purchase process.</p>
+            <img className='rounded-2xl md:hidden' src='stripe-help/mobile-cancel-stripe.webp' />
+            <img className='rounded-2xl hidden md:block' src='stripe-help/desktop-cancel-stripe.webp' />
+            </>
+        )
+    }
     return (
         <>
             {/* Progress Bar */}
@@ -290,7 +272,7 @@ Z`
                                         }}
                                         className={`btn btn-neutral w-full ${tier === 'Standard' && 'btn-secondary'}`}
                                     >
-                                        Standard
+                                        Standard - €{day !== 'Full-Event' ? '50' : '95'}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -299,7 +281,7 @@ Z`
                                         }}
                                         className={`btn btn-neutral w-full ${tier === 'Sponsor' && 'btn-secondary'}`}
                                     >
-                                        Sponsor
+                                        Sponsor - €{day !== 'Full-Event' ? '105' : '175'}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -309,7 +291,7 @@ Z`
                                         className={`btn btn-neutral w-full ${tier === 'Super-Sponsor' && 'btn-secondary'}`}
                                         disabled={day !== 'Full-Event'}
                                     >
-                                        Super-Sponsor {day !== 'Full-Event' && '(Available with Full-Event tickets)'}
+                                        Super-Sponsor {day !== 'Full-Event' ? '(Available with Full-Event tickets)' : '- €275'}
                                     </button>
                                 </div>
                             </div>

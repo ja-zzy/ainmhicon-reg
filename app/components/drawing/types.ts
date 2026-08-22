@@ -1,16 +1,16 @@
 export const strokeColors = {
-   night: "#091413",
-   earth: "#61481C",
-   olive: "#87805E",
-   moss: "#66806A",
-   sage: "#999B84",
-   rose: "#926E6F",
-   coral: "#CA8A8B",
-   clay: "#A64B2A",
-   peach: "#FFC286",
-   sand: "#FFF1AF",
-   sky: "#8FBDD3",
-   cloud: "#BFC6C4",
+    night: "#091413",
+    earth: "#61481C",
+    olive: "#87805E",
+    moss: "#66806A",
+    sage: "#999B84",
+    rose: "#926E6F",
+    coral: "#CA8A8B",
+    clay: "#A64B2A",
+    peach: "#FFC286",
+    sand: "#FFF1AF",
+    sky: "#8FBDD3",
+    cloud: "#BFC6C4",
 } as const;
 
 
@@ -26,11 +26,17 @@ export const backgroundColors = {
 export type BackgroundColor = keyof typeof backgroundColors
 
 
-export type Stroke = {
-    points: number[][];
-    color: StrokeColor;
-    size: number;
-};
+export type Stroke = | {
+        type?: "stroke" | undefined;
+        points: number[][];
+        color: StrokeColor;
+        size: number;
+    }
+    | {
+        type: "eraser";
+        points: number[][];
+        size: number;
+    };
 
 export type Drawing = {
     leaf_template: Leaf;
@@ -40,7 +46,7 @@ export type Drawing = {
 export type Leaf = keyof typeof leafShapes
 
 export const leafShapes = {
-  oak: `
+    oak: `
 M216.90 569.09
 C216.90 569.09 231.23 564.08 233.60 558.02
 C235.07 554.27 242.06 495.28 240.69 493.80
@@ -82,7 +88,7 @@ C247.44 557.11 248.82 570.00 248.82 570.00
 L216.90 569.09
 Z
 `,
-elm: `
+    elm: `
 M236.28 462.12
 C280.12 438.91 313.87 395.51 348.38 353.64
 L331.50 365.69
@@ -117,7 +123,7 @@ L235.07 461.52
 C239.51 500.43 238.39 537.49 223.62 570.00
 Z
 `,
-alder: `
+    alder: `
 M243.03 30.00
 C220.09 119.02 276.28 178.03 356.11 228.07
 C485.38 337.93 409.04 491.93 383.55 513.12
@@ -133,7 +139,7 @@ L376.86 517.14
 C375.81 539.29 370.94 557.62 357.45 567.32
 Z
 `,
-willow: `
+    willow: `
 M401.61 30.00
 C399.97 120.83 403.93 199.93 391.25 275.19
 C367.86 414.04 307.04 514.36 214.03 473.88

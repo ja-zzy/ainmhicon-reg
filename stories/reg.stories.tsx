@@ -85,3 +85,14 @@ export const ConfirmationPage: Story = {
         ticketData: new Set()
     }
 };
+
+export const ActiveCheckoutSession: Story = {
+    args: {
+        user: defaultMockUser,
+        attendee: defaultMockAttendee,
+        onRedirect: () => { },
+        startingStep: 0,
+        ticketData: new Set(),
+        activeCheckoutSession: '12345'
+    }
+};
