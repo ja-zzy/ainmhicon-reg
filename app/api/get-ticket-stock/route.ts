@@ -6,6 +6,7 @@ export async function GET() {
     try {
         tickets = await getTicketAvailability();
     } catch (error: any) {
+        console.error('Error trying to get ticket availability', error)
         return NextResponse.json(
             { error: error.message },
             { status: 500 }

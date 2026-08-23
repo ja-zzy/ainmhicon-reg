@@ -11,26 +11,36 @@ const cocLink = process.env.CODE_OF_CONDUCT_LINK
 export async function POST(req: Request) {
     const { priceId, userId, selectedDay } = await req.json()
 
-    if (overrideUserIds?.indexOf(userId) === -1 && Date.now() < regStartTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" }) }
-    if (Date.now() > regEndTime) { return new Response(new Blob(), { status: 401, statusText: "Reg is now closed" }) }
+    if (overrideUserIds?.indexOf(userId) === -1 && Date.now() < regStartTime) {
+        console.warn('User tried to begin registration before opened', userId)
+        return new Response(new Blob(), { status: 401, statusText: "Reg is not open yet" })
+    }
+    if (Date.now() > regEndTime) {
+        console.warn('User tried to begin registration after reg closed', userId)
+        return new Response(new Blob(), {status: 401, statusText: "Reg is now closed" })
+    }
 
     // Only let users who are fully registered buy a ticket
     const { data: registration, error: regError } = await isUserRegistered(userId)
     if (regError) {
+        console.error('Could not find user id during checkout creation', userId)
         return new NextResponse(`Error finding user with id ${userId}`, { status: 500 })
     } else if (registration) {
+        console.warn('Cannot create checkout session for already registered user', userId)
         return new NextResponse(`User with id ${userId} is already registered`, { status: 401 })
     }
 
     // Don't let the user start another checkout session, otherwise an attacker could quickly drain the ticket stock
     const userCheckingOut = await getActiveCheckoutSession(userId) != null
     if (userCheckingOut) {
+        console.warn('Tried to create multiple checkout sessions for user', userId)
         return new NextResponse(`User with id ${userId} is already in a checkout session`, { status: 401 })
     }
     let ticketStock;
     try {
         ticketStock = new Set(await getTicketAvailability());
     } catch (error: any) {
+        console.error('Error fetching ticket availability', error)
         return NextResponse.json(
             { error: error.message },
             { status: 500 }
@@ -48,7 +58,7 @@ export async function POST(req: Request) {
             : !ticketStock.has(dayIndex)
 
     if (selectedDaySoldOut) {
-    console.log(ticketStock, selectedDay)
+        console.warn('Tried to create checkout session for sold out ticket', ticketStock, selectedDay)
         return new NextResponse(`Sorry, tickets for ${selectedDay} have sold out and are no longer in stock`, { status: 410 })
     }
 
@@ -80,7 +90,8 @@ export async function POST(req: Request) {
         await startUserCheckout(userId, session.id)
         await removeTicketFromDays(selectedDay === 'Full-Event' ? null : dayIndex)
         return NextResponse.json({ sessionId: session.id })
-    } catch {
+    } catch (error) {
+        console.error('Error creating Stripe checkout session', error)
         return new NextResponse("Stripe checkout error", { status: 500 })
     }
 }

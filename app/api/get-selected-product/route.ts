@@ -7,7 +7,10 @@ export async function GET(req: Request) {
     const day = searchParams.get("day");
     const tier = searchParams.get("tier");
 
-    if (!day || !tier) { return new NextResponse("Query params not included", { status: 400 }) }
+    if (!day || !tier) {
+        console.warn('Malformed Stripe product request', day, tier)
+        return new NextResponse("Query params not included", { status: 400 })
+    }
 
     try {
         const result = await stripe.products.search({

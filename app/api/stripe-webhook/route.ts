@@ -12,7 +12,10 @@ export async function POST(req: Request) {
     let event: Stripe.Event;
     // Verify request is legit
     const signature = req.headers.get('stripe-signature')
-    if (!signature) { return new NextResponse('Not allowed', { status: 400 }) }
+    if (!signature) {
+        console.error('No stripe signiature provided in webhook header')
+        return new NextResponse('Not allowed', { status: 400 })
+    }
     try {
         event = stripe.webhooks.constructEvent(rawBody, signature, stripeWebhookSecret)
     } catch {
@@ -61,6 +64,7 @@ export async function POST(req: Request) {
             const product = cancellationLineItems.data[0].price?.product;
 
             if (typeof product !== 'object' || product === null || product.deleted) {
+                console.error('Cannot cancel checkout session, product information could not be fetched', product);
                 return new NextResponse('Product information not found for cancellation', { status: 500 })
             }
 
