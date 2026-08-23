@@ -72,3 +72,17 @@ export async function clearUserCheckout(userId: string) {
         .delete()
         .eq('user_id', userId)
 }
+
+export async function getHotelCode(conId: number = CURRENT_CON_ID) {
+    const {data, error } = await supabase
+        .from("hotel_codes")
+        .select("code")
+        .eq("convention_id", conId);
+
+    if (error) { throw error }
+    if (!data) {
+        return [];
+    }
+
+    return data;
+}
