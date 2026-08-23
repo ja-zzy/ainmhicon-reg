@@ -13,5 +13,5 @@ export async function getHotelCode() {
     if (res.status !== 200) { throw new Error(res.statusText) }
 
     const { hotelCode } = await res.json();
-    return hotelCode;
+    return hotelCode.code;
 }
