@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getHotelCode } from "../utils/public/supabase"
 import { HotelBookingView } from "./view"
+import { useAuth } from "../context/authContext"
 
 export default function HotelBooking() {
     const router = useRouter()
+    const {user} = useAuth();
     const [hotelCode, setHotelCode] = useState<string>()
     const [showError, setShowError] = useState(false)
 
@@ -16,10 +18,12 @@ export default function HotelBooking() {
     }
 
     useEffect(() => {
-        getHotelCode()
-            .then(setHotelCode)
-            .catch(() => setShowError(true))
-    }, [])
+        if(user) {
+            getHotelCode(user.id)
+                .then(setHotelCode)
+                .catch(() => setShowError(true))
+        }
+    }, [user])
 
     return (
         <>
