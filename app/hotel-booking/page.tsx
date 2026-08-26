@@ -4,11 +4,12 @@ import Link from "next/link"
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getHotelCode } from "../utils/public/supabase"
+import { HotelBookingView } from "./view"
 
 export default function HotelBooking() {
     const router = useRouter()
     const [hotelCode, setHotelCode] = useState<string>()
-    const [error, setError] = useState(false)
+    const [showError, setShowError] = useState(false)
 
     function navigateBack() {
         router.push('/dashboard')
@@ -17,17 +18,22 @@ export default function HotelBooking() {
     useEffect(() => {
         getHotelCode()
             .then(setHotelCode)
-            .catch(() => setError(true))
+            .catch(() => setShowError(true))
     }, [])
 
     return (
         <>
-            <p>To book a room in our venue hotel, please book directly on their website:</p>
-            <p>For more information about staying at the venue please <a href='https://ainmhicon.ie/pricing' target='_blank' className="link">Click Here</a></p>
-            <Link href='https://www.claytonhotels.com/liffey-valley/' target='_blank' className='btn mt-2 btn-secondary rounded-md'>Clayton Hotel Liffey Valley Website</Link>
-            <p>Use the promo code "<b>{error ? "ERROR" : hotelCode}</b>" when completing your booking! This code gives special room rates to our attendees.</p>
-
-            <button type="button" onClick={navigateBack} className="btn btn-neutral mt-18 w-full rounded-md">Back to Dashboard</button>
+            <HotelBookingView onBack={navigateBack} discountCode={hotelCode} />
+            <div role={showError ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${showError ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current h-6 w-6 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 className="font-bold">Code Not Found</h3>
+                    <div className="text-xs">Sorry, there was an error finding the discount code. Please try again soon.</div>
+                </div>
+                <button className="btn btn-sm btn-secondary bg-white text-error border-0 rounded-3xl" onClick={() => setShowError(false)}>Okay</button>
+            </div>
         </>
     )
 }
