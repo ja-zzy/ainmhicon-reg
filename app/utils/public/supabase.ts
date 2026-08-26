@@ -7,8 +7,8 @@ if (!supabaseUrl || !supabaseAnonKey) { throw new Error('Missing supabase enviro
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export async function getHotelCode() {
-    const res = await fetch('/api/get-hotel-code', { method: 'GET' });
+export async function getHotelCode(userId:string) {
+    const res = await fetch('/api/get-hotel-code?userId='+userId, { method: 'GET' });
 
     if (res.status !== 200) { throw new Error(res.statusText) }
 
