@@ -21,7 +21,6 @@ type AppViewProps = {
     isLoggedIn: boolean;
     logout: () => void;
     noChrome?: boolean;
-    footerDrawings: Drawing[]
 };
 
 export function AppView({
@@ -29,7 +28,6 @@ export function AppView({
     isLoggedIn,
     logout,
     noChrome,
-    footerDrawings
 }: AppViewProps) {
     return (
         <div
