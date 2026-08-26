@@ -20,7 +20,7 @@ export default function HotelBooking() {
     useEffect(() => {
         if(user) {
             getHotelCode(user.id)
-                .then(setHotelCode)
+                .then((code) => setHotelCode(code))
                 .catch(() => setShowError(true))
         }
     }, [user])

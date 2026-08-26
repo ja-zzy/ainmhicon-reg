@@ -48,19 +48,12 @@ function AppLayoutConnectedContent({
 
   const noChrome = pathname === "/leaf-designer";
 
-      const [drawings, setDrawings] = useState<Drawing[]>([])
-
-      useEffect(() => {
-          fetchAllDrawings().then(d => setDrawings(d))
-      }, [fetchAllDrawings])
-  
     
     return (
         <AppView
             isLoggedIn={!!user}
             logout={logout}
             noChrome={noChrome}
-            footerDrawings={drawings}
         >
             {children}
         </AppView>
