@@ -29,8 +29,7 @@ interface CopyTextChipProps {
 }
 
 function CopyTextChip({ text }: CopyTextChipProps) {
-    const [status, setStatus] = useState<'idle' | 'loading' | 'copied'>(text ? 'idle' : 'loading');
-    useEffect(() => setStatus(text ? 'idle' : 'loading'), [text])
+    const [status, setStatus] = useState<'idle' | 'copied'>('idle');
     const onClick = async () => {
         if (!text) return
 
@@ -50,10 +49,10 @@ function CopyTextChip({ text }: CopyTextChipProps) {
         <button
             type="button"
             onClick={onClick}
-            disabled={status === 'loading'}
+            disabled={!text}
             className={`w-20 h-10 m-auto my-2 rounded-full bg-base-100 px-3 scale-100 transition-all duration-225 hover:cursor-pointer hover:scale-120 disabled:cursor-wait disabled:hover:scale-100 ${status === 'copied' && 'bg-info'}`}
         >
-            {status === "loading" ? <Loading /> :  (
+            {!text ? <Loading /> :  (
                 <span>
                     {status === "copied" && "Copied!"}
                     {status === "idle" && text}
