@@ -1,8 +1,13 @@
 import { isUserRegistered } from "@/app/utils/private/supabase";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-    const { userId } = await req.json()
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+    if(!userId) {
+        return new NextResponse("User Id not provided", { status: 400 })
+    }
+    
     const { data, error } = await isUserRegistered(userId)
     if(error) {
         console.error("Error fetching registration data for user", userId)
