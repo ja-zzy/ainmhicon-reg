@@ -1,9 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { getHotelCode } from "../utils/public/supabase"
 import Loading from "../components/loading"
 
 interface Props {
@@ -32,7 +30,7 @@ interface CopyTextChipProps {
 
 function CopyTextChip({ text }: CopyTextChipProps) {
     const [status, setStatus] = useState<'idle' | 'loading' | 'copied'>(text ? 'idle' : 'loading');
-
+    useEffect(() => setStatus(text ? 'idle' : 'loading'), [text])
     const onClick = async () => {
         if (!text) return
 
