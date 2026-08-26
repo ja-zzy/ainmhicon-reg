@@ -50,7 +50,7 @@ function CopyTextChip({ text }: CopyTextChipProps) {
             type="button"
             onClick={onClick}
             disabled={!text}
-            className={`w-20 h-10 m-auto my-2 rounded-full bg-base-100 px-3 scale-100 transition-all duration-225 hover:cursor-pointer hover:scale-120 disabled:cursor-wait disabled:hover:scale-100 ${status === 'copied' && 'bg-info'}`}
+            className={`min-w-25 h-10 m-auto my-2 rounded-full bg-base-100 px-3 scale-100 transition-all duration-225 hover:cursor-pointer hover:scale-120 disabled:cursor-wait disabled:hover:scale-100 ${status === 'copied' && 'bg-info'}`}
         >
             {!text ? <Loading /> :  (
                 <span>
