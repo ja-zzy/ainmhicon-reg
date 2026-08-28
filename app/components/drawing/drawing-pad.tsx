@@ -568,24 +568,27 @@ export function DrawingPad({ drawing, onSave }: Props) {
 
     return (
         <>
-            <div className="flex h-screen flex-col gap-4">
+            <div className="flex  h-auto flex-col gap-4">
                 <a href='/' className='absolute top-28 right-2'><UIIcon title='Close'><X className="m-auto" /></UIIcon></a>
                 <div className={`flex flex-col gap-4 h-full bg-base-200 rounded-2xl`}>
                     <div className='flex flex-wrap gap-4 items-center'>
-                        <div className="flex gap-4 md:gap-8 w-full justify-between flex-col md:flex-row">
-                            <div className="flex flex-wrap justify-between gap-y-4 md:gap-y-8">
-                                <UIIcon title='Draw' onClick={() => setTool("draw")} activeTool={tool === 'draw'} noHover={tool === 'draw'}>
-                                    <Pen className="m-auto" />
-                                </UIIcon>
-                                <UIIcon onClick={() => setTool("erase")} title='Erase' activeTool={tool === 'erase'} noHover={tool === 'erase'}>
-                                    <Eraser className="m-auto" />
-                                </UIIcon>
-                                <UIIcon title='Undo' onClick={undo}>
-                                    <Undo className="m-auto" />
-                                </UIIcon>
-                                <UIIcon title='Redo' onClick={redo}>
-                                    <Redo className="m-auto" />
-                                </UIIcon>
+                        <div className="flex flex-wrap justify-start gap-3">
+                            <UIIcon title='Draw' onClick={() => setTool("draw")} activeTool={tool === 'draw'} noHover={tool === 'draw'}>
+                                <Pen className="m-auto" />
+                            </UIIcon>
+                            <UIIcon onClick={() => setTool("erase")} title='Erase' activeTool={tool === 'erase'} noHover={tool === 'erase'}>
+                                <Eraser className="m-auto" />
+                            </UIIcon>
+                            <UIIcon title='Undo' onClick={undo}>
+                                <Undo className="m-auto" />
+                            </UIIcon>
+                            <UIIcon title='Redo' onClick={redo}>
+                                <Redo className="m-auto" />
+                            </UIIcon>
+                        </div>
+
+                        <div className='flex w-full justify-between'>
+                            <div className="flex flex-wrap justify-start gap-3 w-full">
                                 <PaletteDropdown swatches={strokeColors} currentColor={strokeColor} icon='brush' onSwatchClick={(name) => {
                                     setStrokeColor(name as StrokeColor);
                                     setTool("draw");
@@ -606,15 +609,17 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                         className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-4 gap-4 shadow-lg right-0 md:left-0 top-8`}
                                     >
                                         {Object.entries(leafShapes).map(([name, shape]) =>
-                                            <button key={name} className='flex flex-row gap-4 items-center text-lg'
-                                                onClick={() =>
-                                                    setSelectedLeaf(name as Leaf)
+                                            <button key={name} className='flex flex-row gap-4 items-center text-lg cursor-pointer'
+                                                onClick={() => {
+                                                    setSelectedLeaf(name as Leaf);
+                                                    (document.activeElement as HTMLElement)?.blur();
+                                                }
                                                 }
                                             >
                                                 <svg width="24" viewBox="0 0 500 600">
                                                     <path d={shape} fill='currentcolor' />
                                                 </svg>
-                                                <span className="capitalize">
+                                                <span className="capitalize select-none">
                                                     {name}
                                                 </span>
                                             </button>
@@ -622,7 +627,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="flex gap-2 ml-auto">
+                            <div className="flex gap-3 justify-start ml-auto">
                                 <UIIcon title='Save' onClick={exportSvg}>
                                     <Save className="m-auto" />
                                 </UIIcon>
@@ -632,112 +637,112 @@ export function DrawingPad({ drawing, onSave }: Props) {
                             </div>
                         </div>
                     </div>
-                    <div className='flex flex-row gap-2 justify-between w-full'>
-                        <div className="flex gap-2 ml-4 items-center text-nowrap">
-                            Brush size
-                            <input
-                                type="range"
-                                min="4"
-                                max="40"
-                                step="4"
-                                value={strokeWidth}
-                                onChange={e => setStrokeWidth(Number(e.target.value))}
-                                className="range range-neutral"
-                            />
-                        </div>
-                        <div className="hidden md:flex gap-2 ml-4 items-center text-nowrap">
-                            Zoom
-                            <input
-                                type="range"
-                                min="1"
-                                max="4"
-                                step="0.1"
-                                value={500 / viewBox.width}
-                                onChange={e => {
-                                    const zoom = Number(e.target.value);
-                                    const width = 500 / zoom;
-                                    const height = 600 / zoom;
-
-                                    setViewBox(prev => {
-                                        const centerX = prev.x + prev.width / 2;
-                                        const centerY = prev.y + prev.height / 2;
-
-                                        return clampViewBox(
-                                            centerX - width / 2,
-                                            centerY - height / 2,
-                                            width,
-                                            height
-                                        );
-                                    });
-                                }}
-                                className="range range-neutral"
-                            />
-                        </div>
+                </div>
+                <div className='flex flex-row gap-2 justify-between w-full'>
+                    <div className="flex gap-2 items-center text-nowrap">
+                        Brush size
+                        <input
+                            type="range"
+                            min="4"
+                            max="40"
+                            step="4"
+                            value={strokeWidth}
+                            onChange={e => setStrokeWidth(Number(e.target.value))}
+                            className="range range-neutral"
+                        />
                     </div>
-                    <div
-                        className="relative flex-1 overflow-hidden rounded-xl border bg-neutral"
-                    >
-                        <svg
-                            ref={svgRef}
-                            className="absolute inset-0 w-full h-full m-auto"
-                            viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-                            preserveAspectRatio="xMidYMid meet"
-                            style={{
-                                touchAction: "none"
+                    <div className="hidden md:flex gap-2 ml-4 items-center text-nowrap">
+                        Zoom
+                        <input
+                            type="range"
+                            min="1"
+                            max="4"
+                            step="0.1"
+                            value={500 / viewBox.width}
+                            onChange={e => {
+                                const zoom = Number(e.target.value);
+                                const width = 500 / zoom;
+                                const height = 600 / zoom;
+
+                                setViewBox(prev => {
+                                    const centerX = prev.x + prev.width / 2;
+                                    const centerY = prev.y + prev.height / 2;
+
+                                    return clampViewBox(
+                                        centerX - width / 2,
+                                        centerY - height / 2,
+                                        width,
+                                        height
+                                    );
+                                });
                             }}
-                            onPointerDown={pointerDown}
-                            onPointerMove={pointerMove}
-                            onPointerUp={pointerUp}
-                            onPointerCancel={pointerUp}
-                        >
-                            <defs>
-                                <clipPath id="leafClip">
-                                    <path id="leafClipPath" d={leafShapes[selectedLeaf]} />
-                                </clipPath>
-                            </defs>
-                            <path
-                                d={leafShapes[selectedLeaf]}
-                                fill={backgroundColors[backgroundColor]}
-                            />
-                            <g clipPath="url(#leafClip)">
-                                {strokes.map((stroke, i) =>
-                                    <path
-                                        key={i}
-                                        d={makePath(stroke)}
-                                        fill={getStrokeFill(stroke)}
-                                    />
-                                )}
-                                {currentStroke.length > 0 && (
-                                    <path
-                                        d={makePath(
-                                            tool === 'erase'
-                                                ? {
-                                                    type: 'eraser',
-                                                    points: currentStroke,
-                                                    size: strokeWidth
-                                                }
-                                                : {
-                                                    type: 'stroke',
-                                                    points: currentStroke,
-                                                    color: strokeColor,
-                                                    size: strokeWidth
-                                                }
-                                        )}
-                                        fill={tool === 'erase' ? backgroundColors[backgroundColor] : strokeColors[strokeColor]}
-                                    />
-                                )}
-                            </g>
-                            {/* Leaf outline */}
-                            <path
-                                d={leafShapes[selectedLeaf]}
-                                fill="none"
-                                stroke="#999"
-                                strokeWidth="3"
-                                strokeDasharray="8 8"
-                                pointerEvents="none"
-                            />
-                        </svg>
+                            className="range range-neutral"
+                        />
                     </div>
+                </div>
+                <div
+                    className="relative flex-1 overflow-hidden rounded-xl border bg-neutral min-h-100"
+                >
+                    <svg
+                        ref={svgRef}
+                        className="absolute inset-0 w-full h-full m-auto"
+                        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
+                        preserveAspectRatio="xMidYMid meet"
+                        style={{
+                            touchAction: "none"
+                        }}
+                        onPointerDown={pointerDown}
+                        onPointerMove={pointerMove}
+                        onPointerUp={pointerUp}
+                        onPointerCancel={pointerUp}
+                    >
+                        <defs>
+                            <clipPath id="leafClip">
+                                <path id="leafClipPath" d={leafShapes[selectedLeaf]} />
+                            </clipPath>
+                        </defs>
+                        <path
+                            d={leafShapes[selectedLeaf]}
+                            fill={backgroundColors[backgroundColor]}
+                        />
+                        <g clipPath="url(#leafClip)">
+                            {strokes.map((stroke, i) =>
+                                <path
+                                    key={i}
+                                    d={makePath(stroke)}
+                                    fill={getStrokeFill(stroke)}
+                                />
+                            )}
+                            {currentStroke.length > 0 && (
+                                <path
+                                    d={makePath(
+                                        tool === 'erase'
+                                            ? {
+                                                type: 'eraser',
+                                                points: currentStroke,
+                                                size: strokeWidth
+                                            }
+                                            : {
+                                                type: 'stroke',
+                                                points: currentStroke,
+                                                color: strokeColor,
+                                                size: strokeWidth
+                                            }
+                                    )}
+                                    fill={tool === 'erase' ? backgroundColors[backgroundColor] : strokeColors[strokeColor]}
+                                />
+                            )}
+                        </g>
+                        {/* Leaf outline */}
+                        <path
+                            d={leafShapes[selectedLeaf]}
+                            fill="none"
+                            stroke="#999"
+                            strokeWidth="3"
+                            strokeDasharray="8 8"
+                            pointerEvents="none"
+                        />
+                    </svg>
                 </div>
             </div>
             <div role={showSizeError ? "alert" : 'presentation'} className={`alert alert-error alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${showSizeError ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
@@ -764,6 +769,13 @@ function UIIcon({ title, onClick, destructive, activeTool, noHover, bgColor, chi
 }
 
 function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swatches: typeof backgroundColors | typeof strokeColors, currentColor: string, icon?: 'brush' | 'fill', onSwatchClick: (color: string) => void }) {
+    const handleSwatchClick = (name: string) => {
+        onSwatchClick(name);
+
+        // Close DaisyUI dropdown
+        (document.activeElement as HTMLElement)?.blur();
+    };
+
     return (
         <div className="dropdown">
             <UIIcon title='Brush color' bgColor={swatches[currentColor as keyof typeof swatches]}>
@@ -781,14 +793,15 @@ function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swat
                         className="flex flex-col items-center"
                     >
                         <button
-                            onClick={() => onSwatchClick(name)}
+                            onClick={() => handleSwatchClick(name)}
                             className={`h-8 w-8 rounded-full transition-all duration-150 outline-black outline ${currentColor !== name && 'cursor-pointer hover:brightness-125'}`}
                             style={{
                                 backgroundColor: color,
                                 outlineWidth: currentColor === name ? "3px" : "0"
                             }}
                         />
-                        <span className="capitalize">
+
+                        <span className="capitalize select-none">
                             {name}
                         </span>
                     </div>
