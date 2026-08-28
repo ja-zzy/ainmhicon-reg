@@ -606,7 +606,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                     </UIIcon>
                                     <ul
                                         tabIndex={-1}
-                                        className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-4 gap-4 shadow-lg right-0 md:left-0 top-8`}
+                                        className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-4 gap-4 shadow-lg left-0 top-8`}
                                     >
                                         {Object.entries(leafShapes).map(([name, shape]) =>
                                             <button key={name} className='flex flex-row gap-4 items-center text-lg cursor-pointer'
@@ -783,7 +783,7 @@ function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swat
             </UIIcon>
             <ul
                 tabIndex={-1}
-                className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-2 shadow-lg grid grid-cols-3 w-55 right-0 md:left-0 top-8`}
+                className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-2 shadow-lg grid grid-cols-3 w-55 left-0 top-8`}
                 style={{
                     height: `${70 * Math.ceil(Object.keys(swatches).length / 3)}px`
                 }}>
