@@ -11,8 +11,9 @@ export default function LeafDesigner() {
     const [savedDrawing, setSavedDrawing] = useState<Drawing | undefined>()
     const [fetched, setFetched] = useState(false)
     const [started, setStarted] = useState(false)
+    const [showSaved, setShowSaved] = useState(false)
     const [error, setError] = useState<string | undefined>()
-    useEffect(() => {authState.fetchUsersDrawing().then(d => setSavedDrawing(d)).finally(() => setFetched(true))}, [authState])
+    useEffect(() => { authState.fetchUsersDrawing().then(d => setSavedDrawing(d)).finally(() => setFetched(true)) }, [authState])
     return (
         <div className="w-full md:w-[80%] m-auto mt-16 p-12 bg-base-200 rounded-3xl">
             <div className={`flex flex-col gap-4 ${started && 'hidden'}`}>
@@ -25,8 +26,14 @@ export default function LeafDesigner() {
                 </p>
                 <button className='btn btn-secondary w-[50%] m-auto mt-8 rounded-lg' onClick={() => setStarted(true)}>Get started</button>
             </div>
-            {started && fetched && <DrawingPad drawing={savedDrawing} onSave={(d) => authState.updateLeaf(d).catch(e => setError("Sorry, something went wrong when we tried to save your drawing."))}/>}
+            {started && fetched && <DrawingPad drawing={savedDrawing} onSave={(d) => authState.updateLeaf(d).then(() => {
+                setShowSaved(true)
+                setTimeout(() => setShowSaved(false), 3_000)
+            }).catch(e => setError("Sorry, something went wrong when we tried to save your drawing."))} />}
             {error && <ErrorMessage error={error} />}
-       </div>
+            {showSaved && <div role={showSaved ? "alert" : 'presentation'} className={`alert alert-info alert-vertical sm:alert-horizontal fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-500 ease-in-out text-[#fff] ${showSaved ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+                <h3 className="font-bold">Drawing saved!</h3>
+            </div>}
+        </div>
     )
 }

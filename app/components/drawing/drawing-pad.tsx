@@ -1,16 +1,19 @@
 "use client";
 
 import { useRef, useState } from "react";
+
 import { useHotkeys } from "react-hotkeys-hook";
+
 import { getStroke } from "perfect-freehand";
+
 import { BackgroundColor, backgroundColors, Drawing, Leaf, leafShapes, Stroke, StrokeColor, strokeColors } from "./types";
+
 import { Eraser, PaintBucket, Palette, Pen, Redo, Save, Trash, Undo, X } from "lucide-react";
 
 const MIN_POINT_DISTANCE = 1.5;
 
 function getObjectSizeKB(obj: unknown) {
     const json = JSON.stringify(obj);
-
     const bytes = new TextEncoder().encode(json).length;
 
     return Number((bytes / 1024).toFixed(2));
@@ -18,8 +21,10 @@ function getObjectSizeKB(obj: unknown) {
 
 function randomKey(o: Object) {
     const keys = Object.keys(o)
+
     return keys[Math.floor(Math.random() * keys.length)]
 }
+
 interface Props {
     drawing?: Drawing;
     onSave: (saved: Drawing) => void;
@@ -27,27 +32,74 @@ interface Props {
 
 export function DrawingPad({ drawing, onSave }: Props) {
     const svgRef = useRef<SVGSVGElement | null>(null);
+
     const [strokeColor, setStrokeColor] = useState<StrokeColor>(randomKey(strokeColors) as StrokeColor);
+
     const [backgroundColor, setBackgroundColor] = useState<BackgroundColor>(drawing ? drawing.background_color : randomKey(backgroundColors) as BackgroundColor);
+
     const [strokeWidth, setStrokeWidth] = useState(10);
+
     const [tool, setTool] = useState<"draw" | "erase">("draw");
+
     const [selectedLeaf, setSelectedLeaf] = useState<Leaf>(drawing ? drawing.leaf_template : randomKey(leafShapes) as Leaf);
+
     const [strokes, setStrokes] = useState<Stroke[]>(drawing ? drawing.strokes : []);
+
     const [currentStroke, setCurrentStroke] = useState<number[][]>([]);
+
     const [undoStack, setUndoStack] = useState<Stroke[][]>([]);
+
     const [redoStack, setRedoStack] = useState<Stroke[][]>([]);
+
     const [showSizeError, setShowSizeError] = useState(false)
+
+    const [viewBox, setViewBox] = useState({
+        x: 0,
+        y: 0,
+        width: 500,
+        height: 600
+    });
+
+    const pointersRef = useRef(
+        new Map<number, { x: number; y: number }>()
+    );
+
+    const gestureRef = useRef<{
+        center: { x: number; y: number };
+        distance: number;
+        focalPoint: { x: number; y: number };
+        viewBox: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        };
+    } | null>(null);
+
+    const panRef = useRef<{
+        pointerId: number;
+        startX: number;
+        startY: number;
+        startViewBox: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        };
+    } | null>(null);
 
     function commitHistory() {
         setUndoStack(prev => [...prev, strokes]);
         setRedoStack([]);
     }
+
     function getSvgPoint(e: React.PointerEvent) {
         if (!svgRef.current) {
             return;
         }
 
         const svg = svgRef.current;
+
         const point = svg.createSVGPoint();
 
         point.x = e.clientX;
@@ -64,17 +116,300 @@ export function DrawingPad({ drawing, onSave }: Props) {
         return [transformed.x, transformed.y];
     }
 
+    function getSvgPointFromClient(
+        x: number,
+        y: number,
+        box = viewBox
+    ) {
+        if (!svgRef.current) {
+            return;
+        }
+
+        const rect = svgRef.current.getBoundingClientRect();
+
+        if (!rect.width || !rect.height) {
+            return;
+        }
+
+        return [
+            box.x + ((x - rect.left) / rect.width) * box.width,
+            box.y + ((y - rect.top) / rect.height) * box.height
+        ];
+    }
+
+    function getLeafPath() {
+        return svgRef.current?.querySelector(
+            "#leafClipPath"
+        ) as SVGPathElement | null;
+    }
+
+    function isInsideLeaf(e: React.PointerEvent) {
+        const path = getLeafPath();
+
+        if (!path || !svgRef.current) {
+            return false;
+        }
+
+        const point = svgRef.current.createSVGPoint();
+
+        point.x = e.clientX;
+        point.y = e.clientY;
+
+        const ctm = svgRef.current.getScreenCTM();
+
+        if (!ctm) {
+            return false;
+        }
+
+        const transformed = point.matrixTransform(ctm.inverse());
+
+        return path.isPointInFill(transformed);
+    }
+
+    function getPointerCenter() {
+        const pointers = [...pointersRef.current.values()];
+
+        if (pointers.length < 2) {
+            return;
+        }
+
+        return {
+            x: (pointers[0].x + pointers[1].x) / 2,
+            y: (pointers[0].y + pointers[1].y) / 2
+        };
+    }
+
+    function getPointerDistance() {
+        const pointers = [...pointersRef.current.values()];
+
+        if (pointers.length < 2) {
+            return;
+        }
+
+        return Math.hypot(
+            pointers[1].x - pointers[0].x,
+            pointers[1].y - pointers[0].y
+        );
+    }
+
+    function clampViewBox(
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    ) {
+        const maxX = Math.max(0, 500 - width);
+        const maxY = Math.max(0, 600 - height);
+
+        return {
+            x: Math.max(0, Math.min(maxX, x)),
+            y: Math.max(0, Math.min(maxY, y)),
+            width,
+            height
+        };
+    }
+
+    function startGesture() {
+        const center = getPointerCenter();
+        const distance = getPointerDistance();
+
+        if (!center || !distance) {
+            return;
+        }
+
+        const focalPoint = getSvgPointFromClient(
+            center.x,
+            center.y
+        );
+
+        if (!focalPoint) {
+            return;
+        }
+
+        gestureRef.current = {
+            center,
+            distance,
+            focalPoint: {
+                x: focalPoint[0],
+                y: focalPoint[1]
+            },
+            viewBox
+        };
+
+        panRef.current = null;
+
+        setCurrentStroke([]);
+    }
+
+    function updateGesture() {
+        const gesture = gestureRef.current;
+
+        if (!gesture) {
+            return;
+        }
+
+        const center = getPointerCenter();
+        const distance = getPointerDistance();
+
+        if (!center || !distance) {
+            return;
+        }
+
+        const scale = distance / gesture.distance;
+
+        const nextWidth = Math.max(
+            125,
+            Math.min(
+                500,
+                gesture.viewBox.width / scale
+            )
+        );
+
+        const nextHeight = nextWidth * (
+            gesture.viewBox.height /
+            gesture.viewBox.width
+        );
+
+        if (!svgRef.current) {
+            return;
+        }
+
+        const rect = svgRef.current.getBoundingClientRect();
+
+        const centerRatioX =
+            (center.x - rect.left) / rect.width;
+
+        const centerRatioY =
+            (center.y - rect.top) / rect.height;
+
+        let nextX =
+            gesture.focalPoint.x -
+            centerRatioX * nextWidth;
+
+        let nextY =
+            gesture.focalPoint.y -
+            centerRatioY * nextHeight;
+
+        const centerStartX =
+            (gesture.center.x - rect.left) / rect.width;
+
+        const centerStartY =
+            (gesture.center.y - rect.top) / rect.height;
+
+        const panX =
+            (center.x - gesture.center.x) /
+            rect.width *
+            gesture.viewBox.width;
+
+        const panY =
+            (center.y - gesture.center.y) /
+            rect.height *
+            gesture.viewBox.height;
+
+        nextX =
+            gesture.focalPoint.x -
+            centerStartX * nextWidth -
+            panX;
+
+        nextY =
+            gesture.focalPoint.y -
+            centerStartY * nextHeight -
+            panY;
+
+        setViewBox(
+            clampViewBox(
+                nextX,
+                nextY,
+                nextWidth,
+                nextHeight
+            )
+        );
+    }
+
     function pointerDown(e: React.PointerEvent) {
+        e.preventDefault();
+
+        pointersRef.current.set(e.pointerId, {
+            x: e.clientX,
+            y: e.clientY
+        });
+
+        svgRef.current?.setPointerCapture(e.pointerId);
+
+        if (pointersRef.current.size === 2) {
+            startGesture();
+            return;
+        }
+
+        if (!isInsideLeaf(e)) {
+            panRef.current = {
+                pointerId: e.pointerId,
+                startX: e.clientX,
+                startY: e.clientY,
+                startViewBox: viewBox
+            };
+
+            return;
+        }
+
         const point = getSvgPoint(e);
-        if (!point) { return }
+
+        if (!point) {
+            return;
+        }
 
         commitHistory();
-        svgRef.current?.setPointerCapture(e.pointerId);
+
         setCurrentStroke([point]);
     }
+
     function pointerMove(e: React.PointerEvent) {
-        if (e.buttons !== 1) { return }
+        if (pointersRef.current.has(e.pointerId)) {
+            pointersRef.current.set(e.pointerId, {
+                x: e.clientX,
+                y: e.clientY
+            });
+        }
+
+        if (pointersRef.current.size >= 2) {
+            e.preventDefault();
+
+            updateGesture();
+
+            return;
+        }
+
+        if (panRef.current) {
+            e.preventDefault();
+
+            const dx =
+                (e.clientX - panRef.current.startX) *
+                viewBox.width /
+                (svgRef.current?.getBoundingClientRect().width || 1);
+
+            const dy =
+                (e.clientY - panRef.current.startY) *
+                viewBox.height /
+                (svgRef.current?.getBoundingClientRect().height || 1);
+
+            setViewBox(
+                clampViewBox(
+                    panRef.current.startViewBox.x - dx,
+                    panRef.current.startViewBox.y - dy,
+                    panRef.current.startViewBox.width,
+                    panRef.current.startViewBox.height
+                )
+            );
+
+            return;
+        }
+
+        if (e.buttons !== 1) {
+            return;
+        }
+
         e.preventDefault();
+
         const point = getSvgPoint(e);
 
         if (!point)
@@ -99,23 +434,42 @@ export function DrawingPad({ drawing, onSave }: Props) {
         });
     }
 
-    function pointerUp() {
+    function pointerUp(e: React.PointerEvent) {
+        pointersRef.current.delete(e.pointerId);
+
+        if (gestureRef.current) {
+            if (pointersRef.current.size < 2) {
+                gestureRef.current = null;
+            }
+
+            panRef.current = null;
+            setCurrentStroke([]);
+
+            return;
+        }
+
+        if (panRef.current?.pointerId === e.pointerId) {
+            panRef.current = null;
+
+            return;
+        }
+
         if (!currentStroke.length)
             return;
 
         const newStroke: Stroke =
             tool === 'erase'
                 ? {
-                      type: 'eraser',
-                      points: currentStroke,
-                      size: strokeWidth
-                  }
+                    type: 'eraser',
+                    points: currentStroke,
+                    size: strokeWidth
+                }
                 : {
-                      type: 'stroke',
-                      points: currentStroke,
-                      color: strokeColor,
-                      size: strokeWidth
-                  };
+                    type: 'stroke',
+                    points: currentStroke,
+                    color: strokeColor,
+                    size: strokeWidth
+                };
 
         setStrokes(prev => [...prev, newStroke]);
 
@@ -125,13 +479,13 @@ export function DrawingPad({ drawing, onSave }: Props) {
     function makePath(stroke: Stroke) {
         const outline =
             getStroke(
-            stroke.points,
-            {
-                size: stroke.size,
-                smoothing: 0.7,
-                thinning: 0.7
-            }
-        );
+                stroke.points,
+                {
+                    size: stroke.size,
+                    smoothing: 0.7,
+                    thinning: 0.7
+                }
+            );
 
         return outline
             .map(
@@ -156,7 +510,9 @@ export function DrawingPad({ drawing, onSave }: Props) {
             return;
 
         setRedoStack(prev => [...prev, strokes]);
+
         setStrokes(previous);
+
         setUndoStack(prev => prev.slice(0, -1));
     }
 
@@ -167,6 +523,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
             return;
 
         setUndoStack(prev => [...prev, strokes]);
+
         setStrokes(next);
 
         setRedoStack(prev => prev.slice(0, -1));
@@ -174,6 +531,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
 
     function clear() {
         commitHistory();
+
         setStrokes([]);
     }
 
@@ -183,22 +541,28 @@ export function DrawingPad({ drawing, onSave }: Props) {
             leaf_template: selectedLeaf,
             strokes
         }
+
         const objSize = getObjectSizeKB(compressed)
+
         console.log(`${objSize}kb`)
+
         if (objSize > 2048) {
             setShowSizeError(true)
         } else {
             onSave(compressed)
         }
-
     }
 
     useHotkeys("ctrl+z", undo, { preventDefault: true })
+
     useHotkeys("meta+z", undo, { preventDefault: true })
 
     useHotkeys("shift+ctrl+z", redo, { preventDefault: true })
+
     useHotkeys("shift+meta+z", redo, { preventDefault: true })
+
     useHotkeys("ctrl+y", redo, { preventDefault: true })
+
     useHotkeys("meta+y", redo, { preventDefault: true })
 
 
@@ -228,8 +592,8 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                 }}
                                 />
                                 <PaletteDropdown swatches={backgroundColors} currentColor={backgroundColor} icon='fill' onSwatchClick={(name) => {
-                                        setBackgroundColor(name as BackgroundColor);
-                                    }}
+                                    setBackgroundColor(name as BackgroundColor);
+                                }}
                                 />
                                 <div className="dropdown">
                                     <UIIcon title='Leaf shape'>
@@ -243,36 +607,22 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                     >
                                         {Object.entries(leafShapes).map(([name, shape]) =>
                                             <button key={name} className='flex flex-row gap-4 items-center text-lg'
-                                                    onClick={() =>
+                                                onClick={() =>
                                                     setSelectedLeaf(name as Leaf)
-                                                    }
-                                                >
+                                                }
+                                            >
                                                 <svg width="24" viewBox="0 0 500 600">
                                                     <path d={shape} fill='currentcolor' />
-                                                    </svg>
+                                                </svg>
                                                 <span className="capitalize">
-                                                        {name}
-                                                    </span>
-                                                </button>
+                                                    {name}
+                                                </span>
+                                            </button>
                                         )}
                                     </ul>
                                 </div>
-                                <div className="flex gap-2 ml-4 items-center text-nowrap">
-                                    Brush size
-                                    <input
-                                        type="range"
-                                        min="4"
-                                        max="40"
-                                        step="4"
-                                        value={strokeWidth}
-                                        onChange={e => setStrokeWidth(Number(e.target.value))}
-                                        className="range range-neutral"
-                                    />
-                                </div>
                             </div>
-
                             <div className="flex gap-2 ml-auto">
-
                                 <UIIcon title='Save' onClick={exportSvg}>
                                     <Save className="m-auto" />
                                 </UIIcon>
@@ -282,13 +632,55 @@ export function DrawingPad({ drawing, onSave }: Props) {
                             </div>
                         </div>
                     </div>
+                    <div className='flex flex-row gap-2 justify-between w-full'>
+                        <div className="flex gap-2 ml-4 items-center text-nowrap">
+                            Brush size
+                            <input
+                                type="range"
+                                min="4"
+                                max="40"
+                                step="4"
+                                value={strokeWidth}
+                                onChange={e => setStrokeWidth(Number(e.target.value))}
+                                className="range range-neutral"
+                            />
+                        </div>
+                        <div className="hidden md:flex gap-2 ml-4 items-center text-nowrap">
+                            Zoom
+                            <input
+                                type="range"
+                                min="1"
+                                max="4"
+                                step="0.1"
+                                value={500 / viewBox.width}
+                                onChange={e => {
+                                    const zoom = Number(e.target.value);
+                                    const width = 500 / zoom;
+                                    const height = 600 / zoom;
+
+                                    setViewBox(prev => {
+                                        const centerX = prev.x + prev.width / 2;
+                                        const centerY = prev.y + prev.height / 2;
+
+                                        return clampViewBox(
+                                            centerX - width / 2,
+                                            centerY - height / 2,
+                                            width,
+                                            height
+                                        );
+                                    });
+                                }}
+                                className="range range-neutral"
+                            />
+                        </div>
+                    </div>
                     <div
                         className="relative flex-1 overflow-hidden rounded-xl border bg-neutral"
                     >
                         <svg
                             ref={svgRef}
                             className="absolute inset-0 w-full h-full m-auto"
-                            viewBox="0 0 500 600"
+                            viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
                             preserveAspectRatio="xMidYMid meet"
                             style={{
                                 touchAction: "none"
@@ -300,45 +692,41 @@ export function DrawingPad({ drawing, onSave }: Props) {
                         >
                             <defs>
                                 <clipPath id="leafClip">
-                                    <path d={leafShapes[selectedLeaf]} />
+                                    <path id="leafClipPath" d={leafShapes[selectedLeaf]} />
                                 </clipPath>
                             </defs>
-
                             <path
                                 d={leafShapes[selectedLeaf]}
                                 fill={backgroundColors[backgroundColor]}
                             />
-
                             <g clipPath="url(#leafClip)">
                                 {strokes.map((stroke, i) =>
-                                        <path
-                                            key={i}
-                                            d={makePath(stroke)}
-                                            fill={getStrokeFill(stroke)}
-                                        />
+                                    <path
+                                        key={i}
+                                        d={makePath(stroke)}
+                                        fill={getStrokeFill(stroke)}
+                                    />
                                 )}
-
                                 {currentStroke.length > 0 && (
                                     <path
                                         d={makePath(
                                             tool === 'erase'
                                                 ? {
-                                                      type: 'eraser',
-                                                      points: currentStroke,
-                                                      size: strokeWidth
-                                                  }
+                                                    type: 'eraser',
+                                                    points: currentStroke,
+                                                    size: strokeWidth
+                                                }
                                                 : {
-                                                      type: 'stroke',
-                                                      points: currentStroke,
-                                                      color: strokeColor,
-                                                      size: strokeWidth
-                                                  }
+                                                    type: 'stroke',
+                                                    points: currentStroke,
+                                                    color: strokeColor,
+                                                    size: strokeWidth
+                                                }
                                         )}
                                         fill={tool === 'erase' ? backgroundColors[backgroundColor] : strokeColors[strokeColor]}
                                     />
                                 )}
                             </g>
-
                             {/* Leaf outline */}
                             <path
                                 d={leafShapes[selectedLeaf]}
@@ -377,7 +765,6 @@ function UIIcon({ title, onClick, destructive, activeTool, noHover, bgColor, chi
 
 function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swatches: typeof backgroundColors | typeof strokeColors, currentColor: string, icon?: 'brush' | 'fill', onSwatchClick: (color: string) => void }) {
     return (
-
         <div className="dropdown">
             <UIIcon title='Brush color' bgColor={swatches[currentColor as keyof typeof swatches]}>
                 {icon === 'brush' ? (<Palette className="m-auto invert mix-blend-difference" />) : <PaintBucket className="m-auto invert mix-blend-difference" />}
@@ -389,24 +776,23 @@ function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swat
                     height: `${70 * Math.ceil(Object.keys(swatches).length / 3)}px`
                 }}>
                 {Object.entries(swatches).map(([name, color]) =>
-                        <div
-                            key={color}
+                    <div
+                        key={color}
                         className="flex flex-col items-center"
-                        >
-                            <button
+                    >
+                        <button
                             onClick={() => onSwatchClick(name)}
                             className={`h-8 w-8 rounded-full transition-all duration-150 outline-black outline ${currentColor !== name && 'cursor-pointer hover:brightness-125'}`}
-                                style={{
-                                    backgroundColor: color,
+                            style={{
+                                backgroundColor: color,
                                 outlineWidth: currentColor === name ? "3px" : "0"
-                                }}
-                            />
-
+                            }}
+                        />
                         <span className="capitalize">
-                                {name}
-                            </span>
-                        </div>
-                    )
+                            {name}
+                        </span>
+                    </div>
+                )
                 }
             </ul>
         </div>
