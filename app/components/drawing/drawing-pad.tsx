@@ -568,7 +568,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
 
     return (
         <>
-            <div className="flex h-screen flex-col gap-4">
+            <div className="flex  h-auto flex-col gap-4">
                 <a href='/' className='absolute top-28 right-2'><UIIcon title='Close'><X className="m-auto" /></UIIcon></a>
                 <div className={`flex flex-col gap-4 h-full bg-base-200 rounded-2xl`}>
                     <div className='flex flex-wrap gap-4 items-center'>
@@ -606,15 +606,17 @@ export function DrawingPad({ drawing, onSave }: Props) {
                                         className={`menu menu-lg dropdown-content bg-base-200 rounded-box z-1 mt-3 p-4 gap-4 shadow-lg right-0 md:left-0 top-8`}
                                     >
                                         {Object.entries(leafShapes).map(([name, shape]) =>
-                                            <button key={name} className='flex flex-row gap-4 items-center text-lg'
-                                                onClick={() =>
-                                                    setSelectedLeaf(name as Leaf)
+                                            <button key={name} className='flex flex-row gap-4 items-center text-lg cursor-pointer'
+                                                onClick={() => {
+                                                        setSelectedLeaf(name as Leaf);
+                                                        (document.activeElement as HTMLElement)?.blur();
+                                                    }
                                                 }
                                             >
                                                 <svg width="24" viewBox="0 0 500 600">
                                                     <path d={shape} fill='currentcolor' />
                                                 </svg>
-                                                <span className="capitalize">
+                                                <span className="capitalize select-none">
                                                     {name}
                                                 </span>
                                             </button>
@@ -675,7 +677,7 @@ export function DrawingPad({ drawing, onSave }: Props) {
                         </div>
                     </div>
                     <div
-                        className="relative flex-1 overflow-hidden rounded-xl border bg-neutral"
+                        className="relative flex-1 overflow-hidden rounded-xl border bg-neutral min-h-100"
                     >
                         <svg
                             ref={svgRef}
@@ -764,6 +766,13 @@ function UIIcon({ title, onClick, destructive, activeTool, noHover, bgColor, chi
 }
 
 function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swatches: typeof backgroundColors | typeof strokeColors, currentColor: string, icon?: 'brush' | 'fill', onSwatchClick: (color: string) => void }) {
+    const handleSwatchClick = (name: string) => {
+        onSwatchClick(name);
+
+        // Close DaisyUI dropdown
+        (document.activeElement as HTMLElement)?.blur();
+    };
+
     return (
         <div className="dropdown">
             <UIIcon title='Brush color' bgColor={swatches[currentColor as keyof typeof swatches]}>
@@ -781,14 +790,15 @@ function PaletteDropdown({ swatches, currentColor, icon, onSwatchClick }: { swat
                         className="flex flex-col items-center"
                     >
                         <button
-                            onClick={() => onSwatchClick(name)}
+                            onClick={() => handleSwatchClick(name)}
                             className={`h-8 w-8 rounded-full transition-all duration-150 outline-black outline ${currentColor !== name && 'cursor-pointer hover:brightness-125'}`}
                             style={{
                                 backgroundColor: color,
                                 outlineWidth: currentColor === name ? "3px" : "0"
                             }}
                         />
-                        <span className="capitalize">
+
+                        <span className="capitalize select-none">
                             {name}
                         </span>
                     </div>
