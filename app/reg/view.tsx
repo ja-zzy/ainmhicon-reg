@@ -231,7 +231,7 @@ export function RegView({ user, attendee, startingStep, ticketData, activeChecko
                                         className={`btn btn-neutral w-full ${day === 'Friday' && 'btn-secondary'}`}
                                         disabled={!ticketData.has(days.friday)}
                                     >
-                                        <span>Friday, 4<sup>th</sup> April 2027</span>
+                                        <span>Friday, 2<sup>nd</sup> April 2027</span>
                                         {!ticketData.has(days.friday) && soldOut}
                                     </button>
                                     <button
@@ -242,7 +242,7 @@ export function RegView({ user, attendee, startingStep, ticketData, activeChecko
                                         className={`btn btn-neutral w-full ${day === 'Saturday' && 'btn-secondary'}`}
                                         disabled={!ticketData.has(days.saturday)}
                                     >
-                                        <span>Saturday, 5<sup>th</sup> April 2027</span>
+                                        <span>Saturday, 3<sup>rd</sup> April 2027</span>
                                         {!ticketData.has(days.saturday) && soldOut}
                                     </button>
                                     <button
@@ -253,7 +253,7 @@ export function RegView({ user, attendee, startingStep, ticketData, activeChecko
                                         className={`btn btn-neutral w-full ${day === 'Sunday' && 'btn-secondary'}`}
                                         disabled={!ticketData.has(days.sunday)}
                                     >
-                                        <span>Sunday, 6<sup>th</sup> April 2027</span>
+                                        <span>Sunday, 4<sup>th</sup> April 2027</span>
                                         {!ticketData.has(days.sunday) && soldOut}
                                     </button>
                                 </div>
