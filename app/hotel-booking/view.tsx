@@ -16,12 +16,6 @@ export function HotelBookingView({ discountCode, onBack }: Props) {
             <p className='mt-2'>You can use the promo code</p>
             <CopyTextChip text={discountCode} />
             <p>when completing your booking to get a special room rate.</p>
-            <div className='bg-error text-neutral rounded-2xl p-4 mt-4'>
-                <h3 className='text-lg'>Important Notice!</h3>
-                <p>The discount code currently has a bug which does not allow booking for Sunday night.</p><br/>
-                <p>If you wish to include Sunday night in your booking, The Clayton have confirmed that you should book up to Saturday night using the code, and then contact them, and they will add on the extra day at the discounted rate.</p><br/>
-                <p>Alternatively, you can wait until Tuesday 1<sup>st</sup> September to book the hotel, when we expect this issue to be resolved.</p>
-            </div>
             <Link href='https://www.claytonhotels.com/liffey-valley/' target='_blank' className='btn mt-8 btn-secondary rounded-md'>Clayton Hotel Liffey Valley Website</Link>
 
             <button type="button" onClick={onBack} className="btn btn-neutral w-full rounded-md">Back to Dashboard</button>
